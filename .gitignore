@@ -1,0 +1,20 @@
+# common ignored files
+.DS_Store
+*.pyc
+__pycache__/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# customized ignored files
+/*.py
+PyNP/build/
+PyNP/rule/__pycache__/
+PyNP/buffer/
+TestCase/
+backup/
+output/
