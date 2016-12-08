@@ -13,7 +13,7 @@ import datetime
 ###BUDGET PERSPECTIVE###
 
 def exceedMaximumIteration(context,args):
-    """Exit the NP algorithm if exceeding maximum iteration number
+    """Exit the PRS algorithm if exceeding maximum iteration number
     Args:
         context: A class Context() recording the information of this case
     Returns:
@@ -24,7 +24,7 @@ def exceedMaximumIteration(context,args):
     return flag
         
 def exceedMaximumSampleSize(context,args):
-    """Exit the NP algorithm if exceeding maximum sample size
+    """Exit the PRS algorithm if exceeding maximum sample size
     Args:
         context: A class Context() recording the information of this case
     Returns:
@@ -34,7 +34,7 @@ def exceedMaximumSampleSize(context,args):
     return flag
     
 def exceedMaximumComputationTime(context,args):
-    """Exit the NP algorithm if exceeding maximum computation time
+    """Exit the PRS algorithm if exceeding maximum computation time
     Args:
         context: A class Context() recording the information of this case
     Returns:
@@ -48,7 +48,7 @@ def exceedMaximumComputationTime(context,args):
 ###PRECISION PERSPECTIVE####
 
 def exceedMaximumTreeLevel(context,args):
-    """Exit the NP algorithm if exceeding maximum tree level
+    """Exit the PRS algorithm if exceeding maximum tree level
     Args:
         context: A class Context() recording the information of this case
     Returns:
@@ -58,7 +58,7 @@ def exceedMaximumTreeLevel(context,args):
     return flag
     
 def exceedMPRMaximumTreeLevel(context,args):
-    """Exit the NP algorithm if minimum tree levels of MPR exceeds maximum tree level
+    """Exit the PRS algorithm if minimum tree levels of MPR exceeds maximum tree level
     Args:
         context: A class Context() recording the information of this case
     Returns:
@@ -70,7 +70,7 @@ def exceedMPRMaximumTreeLevel(context,args):
     return flag    
     
 def exceedPIThreshold(context,args):
-    """Exit the NP algorithm if satisfying the threshold of promising index
+    """Exit the PRS algorithm if satisfying the threshold of promising index
     Args:
         context: A class Context() recording the information of this case
     Returns:

@@ -34,6 +34,17 @@ def averageDominationCount(leaf):
     """
     averageDominationCount = np.mean(leaf.calDominationCount())
     return averageDominationCount
+    
+def medianDominationCount(leaf):
+    """calculate median domination count for this leaf
+    Args:
+        leaf: A class Tree() representing leaf node region
+    Returns:
+        medianDominationCount: A double representing median of domination
+                                count for this leaf node  
+    """
+    medianDominationCount = np.mean(leaf.calDominationCount())
+    return medianDominationCount    
 
 def minimumDominationCount(leaf):
     """calculate minimum domination count for this leaf

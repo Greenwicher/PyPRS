@@ -31,7 +31,7 @@ class Case:
         description: A string of description of this instance
         problem: A class Problem() storing the information of the problem to be
                  solved
-        np: A class NP() storing the information of the customized NP algorithm
+        prs: A class Core() storing the information of the customized PRS algorithm
         results: A dictionay storing the numerical results given problem and np
     Methods:
         init:
@@ -45,7 +45,7 @@ class Case:
         self.description = ''
         self.dir = ''
         self.problem = None
-        self.np = None        
+        self.prs = None        
         self.results = {}
         return
         
@@ -78,12 +78,12 @@ class Case:
 
         
 
-class NP:
-    """ summary of class NP()
+class Core:
+    """ summary of class Core()
     Attributes:
         description: A string illustrating customized algorithms        
         tree: A class Tree() storing the information of search tree
-        rule: A class RuleSet() storing the information of NP's component rule
+        rule: A class RuleSet() storing the information of PRS's component rule
         MPR: A list of class Tree representing the Most Promising Region (MPR)
         paretoSet: A dictionary of current Pareto set
         currentIteration: An integer indicating current iteration #
@@ -96,7 +96,7 @@ class NP:
         sampleSize: An integer list indicating the number of samples at each iteration
         hyperVolume: A doulbe list indicating the hyper volume value at each iteration
     Methods:
-        run: framework of Nested Partition (NP) algorithms
+        run: framework of Partition-based Random Search (PRS) algorithms
     """    
     def __init__(self):
         self.description = ''
@@ -127,14 +127,14 @@ class NP:
         return 
        
     def run(self,problem,outputDir):
-        """ framework of Nested Partition (NP) algorithms
+        """ framework of Partition-based Random Search (PRS) algorithms
         Args:
             problem: A class Problem() storing the description of the problem 
                      to be solved
         Returns:
-            results: A dictionary storing the numerical results of NP algorithm
+            results: A dictionary storing the numerical results of PRS algorithm
         """          
-        #record start time of the NP algorithm
+        #record start time of the PRS algorithm
         self.startTime.append(datetime.datetime.now())
         #initialize the search tree
         self.tree.addNode(None,problem.lb,problem.ub)
@@ -231,7 +231,7 @@ class NP:
         print('Total elapsed time: %.2fs' % (self.computationTime[-1]))
         return results   
         
-    def moprs(maximumSampleSize=1000,deltaSampleSize=30,unitSampleSize=5,sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,alphaPI=0,
+    def moprs(maximumSampleSize=1000,deltaSampleSize=1,unitSampleSize=5,sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,alphaPI=0,
               replicationSize=rule.replicationSize.equal,unitReplicationSize=5,replicationTimes=5):
         #define rules
         ruleArgs = {
@@ -258,9 +258,9 @@ class NP:
         r.init(ruleArgs)
         #new search tree
         tree = Tree()
-        #define NP algorithms
+        #define PRS algorithms
         algoArgs = {'description':'Default MO-PRS','rule':r,'tree':tree,}
-        algo = NP()
+        algo = Core()
         algo.init(algoArgs)  
         return algo
               
