@@ -147,9 +147,11 @@ class Core:
             ### PARTIONING ####
             t = time.process_time()
             #determine MPR
-            self.MPR = utils.identifyMPR(self.tree,self.rule.alphaPI)        
+            self.MPR = utils.identifyMPR(self.tree,self.rule.alphaPI)
+            #exclude too small MPR
+            largeMPR = [leafMPR for leafMPR in self.MPR if max(leafMPR.ub-leafMPR.lb) > self.rule.atomPartitionScale]
             #partition MPR into subregions
-            subregions = utils.MultiThread(self.rule.partition,zip(self.MPR))
+            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR))
             #add new node into the Tree
             for MPR in subregions:
                 parent = MPR['parent']
@@ -231,7 +233,9 @@ class Core:
         print('Total elapsed time: %.2fs' % (self.computationTime[-1]))
         return results   
         
-    def moprs(maximumSampleSize=1000,deltaSampleSize=1,unitSampleSize=5,sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,alphaPI=0,
+    def moprs(maximumSampleSize=1000,deltaSampleSize=30,unitSampleSize=5,
+              sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,
+              alphaPI=0,atomPartitionScale=0,
               replicationSize=rule.replicationSize.equal,unitReplicationSize=5,replicationTimes=5):
         #define rules
         ruleArgs = {
@@ -253,6 +257,7 @@ class Core:
                                          'paretoReplicationSize':10,
                                          'minimumStd':0.1},
                 'alphaPI': alphaPI,
+                'atomPartitionScale': atomPartitionScale,
             }
         r = RuleSet()
         r.init(ruleArgs)
@@ -704,6 +709,8 @@ class RuleSet:
         piArgs: A dictionary of arguments of function pi()
         si: A function handle representing how to calculate sampling index
         siArgs: A dictionary of arguments of function si()
+        alphaPI: A double incidating the percentile to determine promising index
+        atomPartitionScale: A double indicating the smallest scale of atom leaf node region
     Methods:
         init: initialize the arguments of the instance
     """
@@ -722,7 +729,9 @@ class RuleSet:
         self.pi = None
         self.piArgs = {}
         self.si = None
-        self.siArgs = {}    
+        self.siArgs = {}  
+        self.alphaPI = 0
+        self.atomPartitionScale = 0            
         return
         
     def init(self,args):
