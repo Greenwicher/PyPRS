@@ -89,7 +89,8 @@ def Scatter2DColor(pointSet,attr,leafNodes,title,xlabel,ylabel,partition):
         idx = z.argsort()
         x, y, z = x[idx], y[idx], z[idx]
         plt.scatter(x,y,c=z,s=100,edgecolor='')       
-    except:
+    except Exception as e:
+        print(str(e))
         plt.scatter(x,y)
 
     if partition: partitionBounds(leafNodes)

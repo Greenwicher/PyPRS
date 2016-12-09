@@ -301,6 +301,7 @@ def saveWorkspace(filename):
     for key in dir():
         try:
             f_shelf[key] = globals()[key]
-        except:
+        except Exception as e:
+            print(str(e))
             print('ERROR shelving: {0}'.format(key))
     f_shelf.close()    

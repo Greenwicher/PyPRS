@@ -221,8 +221,8 @@ class Core:
         if problem.dim == 2:
             try:
                 visualize.generateAnimation(outputDir)
-            except:
-                None
+            except Exception as e:
+                print(str(e))
         #return current Pareto set and MPR
         self.MPR = utils.identifyMPR(self.tree,self.rule.alphaPI)          
         self.paretoSet =  utils.identifyParetoSetParallel(self.tree)
