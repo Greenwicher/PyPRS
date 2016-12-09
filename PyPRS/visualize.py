@@ -29,9 +29,9 @@ def partitionBounds(leafNodes):
 def Objective2D(ax,xv,yv,objs,title):
     # 3D Surface Plot for Objective 1
     ax.plot_surface(xv,yv,objs,rstride=3,cstride=3,alpha=0.3,cmap=cm.BuPu)
-    ax.contourf(xv,yv,objs,zdir='y',cmap=cm.coolwarm)
-    ax.contourf(xv,yv,objs,zdir='x1',cmap=cm.coolwarm)
-    ax.contourf(xv,yv,objs,zdir='x2',cmap=cm.coolwarm)
+    ax.contourf(xv,yv,objs,zdir='z',cmap=cm.coolwarm, offset=np.min(objs))
+    ax.contourf(xv,yv,objs,zdir='x',cmap=cm.coolwarm, offset=np.min(xv))
+    ax.contourf(xv,yv,objs,zdir='y',cmap=cm.coolwarm, offset=np.max(yv))
     ax.set_xlabel('x1')
     ax.set_ylabel('x2')
     ax.set_zlabel('y')
