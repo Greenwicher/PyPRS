@@ -68,4 +68,29 @@ def maximumDominationCount(leaf):
     maximumDominationCount = np.max(leaf.calDominationCount())
     return maximumDominationCount        
     
-    
+def balancedEE(leaf):
+    """ calculate the indicator for this leaf which can make a balance between
+        exploration and exploitation
+    Args:
+        leaf: A class Tree() representing leaf node region
+    Returns:
+        balancedV: A double representing the balanced value
+    """
+    # determine the exploitation and exploration value for the leaf
+    leafExploitation = minimumDominationCount(leaf)
+    leafExploration = leaf.n / np.product(leaf.ub-leaf.lb)
+    # determine the exploitation and exploration rank for each leafs (not efficient, need to outside)
+    leafNodes = leaf.leafNodes()
+    leafExploitationRank = 0
+    leafExplorationRank = 0
+    for _leaf in leafNodes:
+        _exploitation = minimumDominationCount(_leaf)
+        _exploration = _leaf.n / np.product(_leaf.ub-_leaf.lb)
+        leafExploitationRank += _exploitation < leafExploitation
+        leafExplorationRank += _exploration < leafExploration
+    # determine the number of total observed samples
+    N = np.nanmax([sum([l.n for l in leaf.root.leafNodes()]),1])    
+    # calculate the balanced value with adaptive weight on the exploration part
+    balancedV = leafExploitationRank + leafExplorationRank
+    print(leafExploitationRank, leafExplorationRank)
+    return balancedV
