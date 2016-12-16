@@ -77,14 +77,14 @@ def balancedEE(leaf):
         balancedV: A double representing the balanced value
     """
     # determine the exploitation and exploration value for the leaf
-    leafExploitation = minimumDominationCount(leaf)
+    leafExploitation = medianDominationCount(leaf)
     leafExploration = leaf.n / np.product(leaf.ub-leaf.lb)
     # determine the exploitation and exploration rank for each leafs (not efficient, need to outside)
     leafNodes = leaf.leafNodes()
     leafExploitationRank = 0
     leafExplorationRank = 0
     for _leaf in leafNodes:
-        _exploitation = minimumDominationCount(_leaf)
+        _exploitation = medianDominationCount(_leaf)
         _exploration = _leaf.n / np.product(_leaf.ub-_leaf.lb)
         leafExploitationRank += _exploitation < leafExploitation
         leafExplorationRank += _exploration < leafExploration
