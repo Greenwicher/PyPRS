@@ -151,7 +151,7 @@ class Core:
             #exclude too small MPR
             largeMPR = [leafMPR for leafMPR in self.MPR if max(leafMPR.ub-leafMPR.lb) > self.rule.atomPartitionScale]
             #partition MPR into subregions
-            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR))
+            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR, repeat(self.rule.partitionArgs)))
             #add new node into the Tree
             for MPR in subregions:
                 parent = MPR['parent']
@@ -235,13 +235,15 @@ class Core:
         
     def moprs(maximumSampleSize=1000,deltaSampleSize=30,unitSampleSize=5,
               sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,
-              alphaPI=0,atomPartitionScale=0,
-              replicationSize=rule.replicationSize.equal,unitReplicationSize=5,replicationTimes=5):
+              alphaPI=0,
+              partition=rule.partition.bisection,atomPartitionScale=0,
+              replicationSize=rule.replicationSize.equal,unitReplicationSize=5,replicationTimes=5,
+              partitionArgs={}):
         #define rules
         ruleArgs = {
                 'description' : 'Default Rule',
                 'stop' : rule.stop.exceedMaximumSampleSize,
-                'partition' : rule.partition.bisection,
+                'partition' : partition,
 #                'sampleSize' : rule.sampleSize.samplingIndex,
                 'sampleSize' : sampleSize,
                 'replicationSize' : replicationSize,
@@ -258,6 +260,7 @@ class Core:
                                          'minimumStd':0.1},
                 'alphaPI': alphaPI,
                 'atomPartitionScale': atomPartitionScale,
+                'partitionArgs': partitionArgs,
             }
         r = RuleSet()
         r.init(ruleArgs)
