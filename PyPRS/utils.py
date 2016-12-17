@@ -288,6 +288,28 @@ def determineParetoLayer(objs,layer):
         # find next layer
         return determineParetoLayer(objs,layer)
         
+def discretize(samples, LB, UB, discreteLevel):
+    """ discretize the samples based on the problem's discretized level
+    Args:
+        samples: An n * dimX array representing the uniformlly samples 
+        LB: A numpy array indicating the lower bound of solution space
+        UB: A numpy array indicating the upper bound of solution space
+        discreteLevel: An integer indicating the discrete level (0 means continuous)
+    Returns:
+        discretizedSamples: An n * dimX array representing the discretized samples   
+    """
+    # check whether the optimization problem is discrete
+    if discreteLevel != 0:
+        # calculate the unit distance
+        unit = (UB - LB) / discreteLevel
+        # transform the real-valued p to "discrete-valued p"
+        transform = lambda p: LB + np.round(((p - LB) / unit), 0) * unit
+        # transform all the samples to the required format
+        discretizedSamples = np.array(list(map(transform, samples)))
+    else:
+        discretizedSamples = samples    
+    return discretizedSamples
+
 def openWorkspace(filename):
     ''' restore the workspace '''
     f_shelf = shelve.open(filename)
