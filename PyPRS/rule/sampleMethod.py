@@ -8,6 +8,7 @@
 """
 
 import numpy as np
+from .. import utils
 
 def uniform(leaf,n):
     """draw n uniform distributed samples from this leaf
@@ -18,5 +19,18 @@ def uniform(leaf,n):
         leaf: This leaf
         samples: An n * dimX array representing the uniformlly samples     
     """
-    samples = np.random.uniform(leaf.lb,leaf.ub,(n,len(leaf.lb)))
+    samples = discretize(leaf, np.random.uniform(leaf.lb,leaf.ub,(n,len(leaf.lb))))
     return {'leaf':leaf,'samples':samples}
+    
+
+def discretize(leaf, samples):
+    """ discretize the samples based on the problem's discretized level
+    Args:
+        leaf: A class Tree() representing the leaf node region
+        samples: An n * dimX array representing the samples     
+    Returns:
+        discretizedSamples: An n * dimX array representing the discretized samples     
+    """
+    LB, UB, discreteLevel = leaf.problem.lb, leaf.problem.ub, leaf.problem.discreteLevel
+    discretizedSamples = utils.discretize(samples, LB, UB, discreteLevel)
+    return discretizedSamples
