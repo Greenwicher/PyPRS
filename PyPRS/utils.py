@@ -190,7 +190,7 @@ def withinRegion(x,lb,ub):
     Returns:
         flag: A boolean value indicating whether x belongs to this region
     """
-    flag = all(lb<=x) and all(x<ub)
+    flag = all(lb<=x) and all(x<=ub)
     return flag        
     
     
