@@ -876,10 +876,15 @@ class Tree:
         for p,ol in zip(points,objectives):
             key = utils.generateKey(p) # determine the key of this point
             if key in self.pool:
-                # add new observations to the already sampled points                
-                _p = self.pool[key] 
-                for o in ol:
-                    _p.history = np.vstack([_p.history,o])                 
+                # only increase history list for stochastic optimization
+                if self.problem.stochastic:
+                    # add new observations to the already sampled points                
+                    _p = self.pool[key] 
+                    for o in ol:
+                        _p.history = np.vstack([_p.history,o])     
+                else:
+                    # for deterministic case
+                    continue
             else:
                 # add observations to the new sampled points
                 _p = Point()
