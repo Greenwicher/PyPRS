@@ -324,8 +324,14 @@ class Problem:
         num: An integer representing the size of xv of meshgrid 
         stochastic: A boolean indicating whether the problem is stochastic
         std: A double representing the std of objectives
+        discreteLevel: An integer indicating the discrete level (0 means continuous)
         referencePoint: A numpy array representing random selected reference
           point
+        trueParetoSet: A numpy array storing the discretized true Pareto set
+        bestHyperVolume: A double representing the best hypervolume value given
+          trueParetoSet
+        dim:
+         
     Methods:
         init: initialize the arguments of the instance
         evaluate: evaluate the objectives of point x
@@ -338,6 +344,7 @@ class Problem:
         self.num = np.NaN
         self.stochastic = False
         self.std = 0.0
+        self.discreteLevel = 0
         self.referencePoint = np.array([])
         self.trueParetoSet = np.array([])
         self.bestHyperVolume = np.NaN
