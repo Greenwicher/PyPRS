@@ -415,13 +415,16 @@ class Problem:
             results.append(result)
         return results        
         
-    def zdt1(num,isStochastic,std=1,dim=2,referencePoint = np.array([])):
+    def zdt1(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """
         lb = np.array([0,]*dim)
         ub = np.array([1,]*dim)
         objectives = [objective.zdt11,objective.zdt12]   
-        trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,0.99,10000)])
+        if discreteLevel != 0:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
+        else:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
         problemArgs = {
                         'description':'ZDT1',
                         'lb':lb,
@@ -433,18 +436,22 @@ class Problem:
                         'referencePoint': referencePoint,
                         'trueParetoSet': trueParetoSet,
                         'dim': dim,
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
         return problem     
         
-    def zdt2(num,isStochastic,std=1,dim=2,referencePoint = np.array([])):
+    def zdt2(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
         lb = np.array([0,]*dim)
         ub = np.array([1,]*dim)
         objectives = [objective.zdt21,objective.zdt22]   
-        trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,0.99,10000)])
+        if discreteLevel != 0:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
+        else:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
         problemArgs = {
                         'description':'ZDT2',
                         'lb':lb,
@@ -455,19 +462,23 @@ class Problem:
                         'std': std,
                         'referencePoint': referencePoint,   
                         'trueParetoSet': trueParetoSet,   
-                        'dim': dim,                        
+                        'dim': dim,          
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
         return problem         
         
-    def zdt3(num,isStochastic,std=1,dim=2,referencePoint = np.array([])):
+    def zdt3(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
         lb = np.array([0,]*dim)
         ub = np.array([1,]*dim)
         objectives = [objective.zdt31,objective.zdt32]    
-        trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,0.99,10000)])
+        if discreteLevel != 0:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
+        else:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
         problemArgs = {
                         'description':'ZDT3',
                         'lb':lb,
@@ -478,19 +489,23 @@ class Problem:
                         'std': std,
                         'referencePoint': referencePoint, 
                         'trueParetoSet': trueParetoSet,    
-                        'dim': dim,                        
+                        'dim': dim,      
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
         return problem         
 
-    def zdt4(num,isStochastic,std=1,dim=2,referencePoint = np.array([])):
+    def zdt4(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
         lb = np.array([0]+[-5]*(dim-1))
         ub = np.array([1]+[5]*(dim-1))
         objectives = [objective.zdt41,objective.zdt42]   
-        trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,0.99,10000)])
+        if discreteLevel != 0:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
+        else:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
         problemArgs = {
                         'description':'ZDT4',
                         'lb':lb,
@@ -501,19 +516,23 @@ class Problem:
                         'std': std,
                         'referencePoint': referencePoint, 
                         'trueParetoSet': trueParetoSet, 
-                        'dim': dim,                        
+                        'dim': dim,    
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
         return problem         
 
-    def zdt6(num,isStochastic,std=1,dim=2,referencePoint = np.array([])):
+    def zdt6(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
         lb = np.array([0,]*dim)
         ub = np.array([1,]*dim)
         objectives = [objective.zdt61,objective.zdt62]  
-        trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,100)])
+        if discreteLevel != 0:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
+        else:
+            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
         problemArgs = {
                         'description':'ZDT6',
                         'lb':lb,
@@ -524,7 +543,8 @@ class Problem:
                         'std': std,
                         'referencePoint': referencePoint,   
                         'trueParetoSet': trueParetoSet,  
-                        'dim': dim,                        
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
         }
         problem = Problem()
         problem.init(problemArgs)
@@ -566,7 +586,7 @@ class Problem:
         problem.init(problemArgs)
         return problem  
 
-    def fon(num,isStochastic,std=1,dim=2,referencePoint = np.array([])):
+    def fon(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=...=xn=[-1/sqrt(n),1/sqrt(n)]}
         """        
 #        dim = 2
@@ -574,6 +594,7 @@ class Problem:
         ub = np.array([4,]*dim)
         objectives = [objective.fon1,objective.fon2]   
         trueParetoSet = [[x1,]*dim for x1 in np.linspace(-1/np.sqrt(dim),1/np.sqrt(dim),10000)]   
+        trueParetoSet = utils.discretize(trueParetoSet, lb, ub, discreteLevel)
         problemArgs = {
                         'description':'FON',
                         'lb':lb,
@@ -584,7 +605,8 @@ class Problem:
                         'std': std,
                         'referencePoint': referencePoint, 
                         'trueParetoSet': trueParetoSet,   
-                        'dim': dim,                         
+                        'dim': dim,          
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
@@ -666,7 +688,7 @@ class Problem:
         problem.init(problemArgs)
         return problem  
         
-    def pol(num,isStochastic,std=1,referencePoint=np.array([])):
+    def pol(num,isStochastic,std=1,referencePoint=np.array([]), discreteLevel = 0):
         lb = np.array([-np.pi,-np.pi])
         ub = np.array([np.pi,np.pi])
         objectives = [objective.pol1,objective.pol2]        
@@ -678,13 +700,14 @@ class Problem:
                         'num': num,
                         'stochastic': isStochastic,
                         'std': std,
-                        'referencePoint':referencePoint,                        
+                        'referencePoint':referencePoint,   
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
         return problem    
         
-    def kur(num,isStochastic,std=1,dim=2,referencePoint=np.array([])):
+    def kur(num,isStochastic,std=1,dim=2,referencePoint=np.array([]), discreteLevel = 0):
         lb = np.array([-5,]*dim)
         ub = np.array([5,]*dim)
         objectives = [objective.kur1,objective.kur2]        
@@ -697,7 +720,8 @@ class Problem:
                         'stochastic': isStochastic,
                         'std': std,
                         'referencePoint': referencePoint, 
-                        'dim': dim,                        
+                        'dim': dim,      
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
@@ -834,7 +858,8 @@ class Tree:
             self.promisingIndex = 1
         self.root.nodeSet.append(self) #add new nodes to the nodeSet
         self.lb = lb
-        self.ub = ub        
+        self.ub = ub 
+        self.problem = problem
         return 
         
     def updatePool(self,points,objectives,problem):
