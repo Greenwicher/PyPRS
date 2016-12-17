@@ -137,7 +137,7 @@ class Core:
         #record start time of the PRS algorithm
         self.startTime.append(datetime.datetime.now())
         #initialize the search tree
-        self.tree.addNode(None,problem.lb,problem.ub)
+        self.tree.addNode(None,problem.lb,problem.ub,problem)
         #initialize iteration information
         self.currentIteration = 1
         #partitioning->sampling->evaluation
@@ -159,7 +159,7 @@ class Core:
                 #add new children nodes
                 for sub in MPR['subRegions']:                     
                     _node = Tree()
-                    _node.addNode(parent,sub[0],sub[1])
+                    _node.addNode(parent,sub[0],sub[1],problem)
             t1 = time.process_time() - t 
             ### SAMPLING ###     
             t = time.process_time()
@@ -799,12 +799,13 @@ class Tree:
         self.n = np.NaN
         return None
     
-    def addNode(self, parent, lb, ub):
+    def addNode(self, parent, lb, ub, problem):
         """ add node to the Tree
         Args: 
             parent: parent node 
             lb: lower bound of decision variables, lb <= x
             ub: upper bound of decision variables, x < ub
+            problem: A class Problem() 
         Returns:
             None
         """
