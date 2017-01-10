@@ -25,6 +25,9 @@ def calHyperVolume(paretoSet,referencePoint):
 #    HV = hv.HyperVolume(referencePoint)
 #    hyperVolume = HV.compute(front)
     # use PyGMO
-    HV = PyGMO.hypervolume(front)
-    hyperVolume = HV.compute(r=list(referencePoint))
+    try:
+        HV = PyGMO.hypervolume(front)
+        hyperVolume = HV.compute(r=list(referencePoint))
+    except:
+        hyperVolume = 0.0
     return hyperVolume
