@@ -50,14 +50,12 @@ def metropolisIndex(leaf,args):
     """
     unitSampleSize = args['unitSampleSize']
     leafNodes = leaf.root.leafNodes()
-    sumAlpha = 0.0
-    for l in leafNodes:
-        sumAlpha += l.samplingIndex
-    acceptProb = leaf.samplingIndex / sumAlpha
+    maxSamplingIndex = np.nanmax([l.samplingIndex for l in leafNodes])
     p = np.random.rand()
-    if p<acceptProb:
+    acceptProb = leaf.samplingIndex / maxSamplingIndex
+    if p < acceptProb:
         alpha = unitSampleSize           
     else:
-        alpha = 0.0
-    print('Prob=%.3f, AcceptProb=%.3f, alpha=%d'%(p,acceptProb,alpha))         
+        alpha = [unitSampleSize, 0.0][leaf.pool!={}]
+    print('Prob=%.3f, AcceptProb=%.3f, alpha=%d \n' % (p,acceptProb,alpha))         
     return alpha
