@@ -17,8 +17,6 @@ def ucb(leaf,args):
     Returns:
         value: A double representing the sampling index
     """
-    #determine the number of leaf nodes    
-    N = np.nanmax([sum([l.n for l in leaf.root.leafNodes()]),1])
 #    Q = sum([np.sqrt(2*np.log(N)/max(l.n,1)) for l in leaf.root.leafNodes()])
     #determine the maximum promixing index
     M = np.nanmax([l.promisingIndex for l in leaf.root.leafNodes()])
@@ -29,6 +27,6 @@ def ucb(leaf,args):
         value = (M-leaf.parent.promisingIndex)
     else:
         #calculate the ucb-like index
-        value = (M-leaf.promisingIndex)+ args['ucb_c']*np.sqrt(2*np.log(N)/np.nanmax([leaf.n,1]))
+        value = (M-leaf.promisingIndex)+ args['ucb_c']*np.sqrt(2*np.log(max(leaf.parent.n,0))/np.nanmax([leaf.n,1]))
     #print(value)
     return value
