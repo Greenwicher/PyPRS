@@ -8,6 +8,7 @@
 """
 
 import numpy as np
+from . import pi
 
 def bisection(leaf, args):
     """ Partition a given bounded hyperbox region into two subregions based
@@ -55,7 +56,8 @@ def xsection(leaf, args):
     # find the dimension number of decision variabless
     dimX = len(lb)
     # determine the dimension that should be partitioned
-    dimID = (leaf.level + 1) % dimX 
+    #dimID = (leaf.level + 1) % dimX  # debug
+    dimID = nextDim(leaf, args)
     # determine the partition unit distance 
     unit = (ub[dimID] - lb[dimID]) / x
     # construct the subRegions
@@ -68,3 +70,52 @@ def xsection(leaf, args):
             _ub = np.append(_ub, ub[j] - (unit * (x - i - 1)) * (j == dimID))
         subRegions.append([_lb,_ub])
     return {'parent':leaf,'thr':[unit * i for i in range(x)],'subRegions':subRegions}    
+            
+def nextDim(leaf, args):
+    """ Determine the next dimension to partition
+    Args:
+        leaf: A class Tree() representing leaf node region
+        args: A dictionary representing the arguments necessary for partition
+    Returns:
+        dim: An integer indicating the next dimension to partition
+    """
+    x = args['xsectionNum'] # number of subregions to partition for the leaf
+    lb = leaf.lb # the lower bound of the leaf region
+    ub = leaf.ub # the upper bound of the leaf region
+    dimDiff = [] # store the diff value (e.g. max-min of dominantion count) for partition direction
+    dimX = len(lb) # the number of dimension
+    visitedPoints = leaf.visitedPoints() # all the visited points in the tree
+    pool = leaf.pool # the visited points in this leaf
+    # enumerate all the possible next dimension to partition
+    for dimID in range(dimX):
+        # determine the partition unit distance 
+        unit = (ub[dimID] - lb[dimID]) / x
+        # initialize the promisingIndex for each subregion based on xsection
+        promisingIndex = []        
+        for i in range(x):
+            _lb, _ub = [np.array([]) for _ in range(2)]
+            # change the lower and upper bound value at dimID for subRegion x
+            for j in range(dimX):
+                _lb = np.append(_lb, lb[j] + (unit * i) * (j == dimID))
+                _ub = np.append(_ub, ub[j] - (unit * (x - i - 1)) * (j == dimID))
+            # calculate the promisingIndex for each subregions
+            poolDominantionCount = [np.nan] # in case no points in this subregion
+            for key in pool:
+                p = pool[key]                
+                if all(_lb <= p.x) and all(p.x < ub):
+                    dominantionCount = pi.calDominationCount(p,visitedPoints)
+                    poolDominantionCount.append(dominantionCount)
+            # calculate the promising index in this subregion            
+            promisingIndex.append(np.nanmin(poolDominantionCount))
+        # calculate the dimDiff for the dimension dimID            
+        diff = np.nanmax(promisingIndex) - np.nanmin(promisingIndex)
+        dimDiff.append(diff)        
+    # select the dimension with largest dimDiff value as next dimension to partition
+    maxDiff = np.nanmax(dimDiff)
+    if not(np.isnan(maxDiff)):
+        candidate = [i for i in range(dimX) if dimDiff[i] == maxDiff]        
+        dim = candidate[np.random.randint(0,len(candidate))]
+    else:
+        dim = np.random.randint(0,dimX)
+    print('Select Dim %d with maxDiff %.2f\n' % (dim, maxDiff))
+    return dim
