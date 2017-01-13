@@ -133,7 +133,7 @@ def All(case):
     if case.problem.dim != 2:
         return 
     num = case.problem.num
-    leafNodes = case.np.tree.root.leafNodes()
+    leafNodes = case.prs.tree.root.leafNodes()
     results = case.problem.trueParetoSetInfo
     xv = results['xv']
     yv = results['yv']
@@ -170,7 +170,7 @@ def All(case):
     
     #visitedSolutions
     fig.add_subplot(246)
-    visitedPoints = case.np.tree.visitedPoints()
+    visitedPoints = case.prs.tree.visitedPoints()
     Scatter2DColor(visitedPoints,'x',leafNodes,'Scatter of All Visited Points','x1','x2',True)    
         
     #paretoSet
@@ -290,8 +290,8 @@ def HVIteration(problemKey,CASE):
         None
     """
     for case in CASE:
-        np = case.np
-        plt.plot(range(1,np.currentIteration),np.hyperVolume,label=np.description)
+        prs = case.prs
+        plt.plot(range(1,prs.currentIteration),prs.hyperVolume,label=prs.description)
     plt.title(problemKey)
     plt.xlabel('Iteration')
     plt.ylabel('Hypervolume')
@@ -307,11 +307,11 @@ def HVComputationTime(problemKey,CASE):
         None
     """
     for case in CASE:
-        np = case.np
+        prs = case.prs
         time = []
-        for t in np.endTime[:-1]:
-            time.append((t-np.startTime[1]).total_seconds())
-        plt.plot(time,np.hyperVolume,label=np.description)
+        for t in prs.endTime[:-1]:
+            time.append((t-prs.startTime[1]).total_seconds())
+        plt.plot(time,prs.hyperVolume,label=prs.description)
     plt.title(problemKey)
     plt.xlabel('Computation Time (s)')
     plt.ylabel('Hypervolume')
@@ -327,8 +327,8 @@ def HVSampleSize(ax,problemKey,CASE):
         None
     """
     for case in CASE:
-        np = case.np
-        plt.plot(np.sampleSize,np.hyperVolume,label=np.description)
+        prs = case.prs
+        plt.plot(prs.sampleSize,prs.hyperVolume,label=prs.description)
     plt.title(problemKey)
     plt.xlabel('Sample Size')
     plt.ylabel('Hypervolume')
