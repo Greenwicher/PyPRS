@@ -9,6 +9,8 @@
 
 #from . import hv
 import PyGMO
+from . import utils
+
 
 def calHyperVolume(paretoSet,referencePoint):
     """ calculate the hypervolume value
@@ -31,3 +33,22 @@ def calHyperVolume(paretoSet,referencePoint):
     except:
         hyperVolume = 0.0
     return hyperVolume
+    
+def calTrueParetoProportition(paretoSet, trueParetoSet):
+    """ calculate the proportion of true Pareto solution given the estimated 
+        Pareto set and true Pareto set
+    Args:
+        paretoSet: A dictionary of estimated Pareto set with class Point()
+        trueParetoSet: A dictionary of true Pareto set with class Point()
+    Returns:
+        trueParetoProportition: A double indicating the proportion of true 
+        Pareto solution given the estimated Pareto set and true Pareto set
+    """
+    paretoSetKey = set()
+    trueParetoSetKey = set()
+    for k in paretoSet:
+        paretoSetKey.add(utils.generateKey(paretoSet[k].x))
+    for k in trueParetoSet:
+        trueParetoSetKey.add(utils.generateKey(trueParetoSet[k].x))
+    trueParetoProportition = len(paretoSetKey & trueParetoSetKey) / len(trueParetoSetKey)
+    return trueParetoProportition
