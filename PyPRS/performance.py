@@ -10,6 +10,7 @@
 #from . import hv
 import PyGMO
 from . import utils
+import numpy as np
 
 
 def calHyperVolume(paretoSet,referencePoint):
@@ -52,3 +53,28 @@ def calTrueParetoProportition(paretoSet, trueParetoSet):
         trueParetoSetKey.add(utils.generateKey(trueParetoSet[k].x))
     trueParetoProportition = len(paretoSetKey & trueParetoSetKey) / len(trueParetoSetKey)
     return trueParetoProportition
+    
+def calHausdorffDistance(paretoSet, trueParetoSet):
+    """ calculate Hausdorff distance (see https://en.wikipedia.org/wiki/Hausdorff_distance)
+        between the estimated Pareto set and true Pareto set
+    Args:
+        paretoSet: A dictionary of estimated Pareto set with class Point()
+        trueParetoSet: A dictionary of true Pareto set with class Point()
+    Returns:
+        HausdorffDistance: A double indicating Hausdorff distance
+    """    
+    paretoSetList = [paretoSet[k].x for k in paretoSet]
+    trueParetoSetList = [trueParetoSet[k].x for k in trueParetoSet]
+    m, n = len(paretoSetList), len(trueParetoSetList)
+    d = [[np.nan] * n for _ in range(m)]
+    for i in range(m):
+        for j in range(n):
+            d[i][j] = np.linalg.norm(paretoSetList[i] - trueParetoSetList[j])
+    d = np.array(d)
+    rowDistance, colDistance = [], []
+    for i in range(m):
+        rowDistance.append(np.min(d[i]))
+    for j in range(n):
+        colDistance.append(np.min(d[:,j]))
+    HausdorffDistance = np.max([np.max(rowDistance), np.max(colDistance)])
+    return HausdorffDistance
