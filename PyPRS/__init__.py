@@ -73,7 +73,7 @@ class Case:
             self.results: A dictionay storing the numerical results given 
                           problem and np
         """
-        self.results = self.np.run(self.problem,self.dir)
+        self.results = self.prs.run(self.problem,self.dir)
         return self.results
 
         
@@ -196,7 +196,7 @@ class Core:
 #                repSize = np.array([self.rule.replicationSizeArgs['paretoReplicationSize']]*len(paretoSet))
 #                objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))                
 #                node.updatePool(points,objectives,problem) 
-            paretoSet = utils.identifyParetoSetParallel(self.tree)                       
+            paretoSet = utils.identifyParetoSetParallel(self.tree)                      
             #update promising index                       
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))              
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))             
@@ -234,6 +234,8 @@ class Core:
         return results   
         
     def moprs(maximumSampleSize=1000,deltaSampleSize=30,unitSampleSize=5,
+              stop = rule.stop.exceedMaximumSampleSize,
+              sampleMethod=rule.sampleMethod.uniform,
               sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,
               alphaPI=0,
               partition=rule.partition.bisection,atomPartitionScale=0,
@@ -242,12 +244,12 @@ class Core:
         #define rules
         ruleArgs = {
                 'description' : 'Default Rule',
-                'stop' : rule.stop.exceedMaximumSampleSize,
+                'stop' : stop,
                 'partition' : partition,
 #                'sampleSize' : rule.sampleSize.samplingIndex,
                 'sampleSize' : sampleSize,
                 'replicationSize' : replicationSize,
-                'sampleMethod' : rule.sampleMethod.uniform,
+                'sampleMethod' : sampleMethod,
                 'pi' : pi,
                 'si' : rule.si.ucb,
                 'siArgs': {'ucb_c':0.5},
@@ -418,8 +420,8 @@ class Problem:
     def zdt1(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """
-        lb = np.array([0,]*dim)
-        ub = np.array([1,]*dim)
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
         objectives = [objective.zdt11,objective.zdt12]   
         if discreteLevel != 0:
             trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
@@ -445,8 +447,8 @@ class Problem:
     def zdt2(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
-        lb = np.array([0,]*dim)
-        ub = np.array([1,]*dim)
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
         objectives = [objective.zdt21,objective.zdt22]   
         if discreteLevel != 0:
             trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
@@ -472,8 +474,8 @@ class Problem:
     def zdt3(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
-        lb = np.array([0,]*dim)
-        ub = np.array([1,]*dim)
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
         objectives = [objective.zdt31,objective.zdt32]    
         if discreteLevel != 0:
             trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
@@ -499,8 +501,8 @@ class Problem:
     def zdt4(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
-        lb = np.array([0]+[-5]*(dim-1))
-        ub = np.array([1]+[5]*(dim-1))
+        lb = np.array([0.0]+[-5.0]*(dim-1))
+        ub = np.array([1.0]+[5.0]*(dim-1))
         objectives = [objective.zdt41,objective.zdt42]   
         if discreteLevel != 0:
             trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
@@ -526,8 +528,8 @@ class Problem:
     def zdt6(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
-        lb = np.array([0,]*dim)
-        ub = np.array([1,]*dim)
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
         objectives = [objective.zdt61,objective.zdt62]  
         if discreteLevel != 0:
             trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
@@ -590,8 +592,8 @@ class Problem:
         """optimal solution = {x1=...=xn=[-1/sqrt(n),1/sqrt(n)]}
         """        
 #        dim = 2
-        lb = np.array([-4,]*dim)
-        ub = np.array([4,]*dim)
+        lb = np.array([-4.0,]*dim)
+        ub = np.array([4.0,]*dim)
         objectives = [objective.fon1,objective.fon2]   
         trueParetoSet = [[x1,]*dim for x1 in np.linspace(-1/np.sqrt(dim),1/np.sqrt(dim),10000)]   
         trueParetoSet = utils.discretize(trueParetoSet, lb, ub, discreteLevel)
@@ -672,8 +674,8 @@ class Problem:
     def sch(num,isStochastic,std=1):
         """optimal solution = {x=[0,2]}
         """                
-        lb = np.array([-3])
-        ub = np.array([3])
+        lb = np.array([-3.0])
+        ub = np.array([3.0])
         objectives = [objective.sch1,objective.sch2]        
         problemArgs = {
                         'description':'SCH',
@@ -708,8 +710,8 @@ class Problem:
         return problem    
         
     def kur(num,isStochastic,std=1,dim=2,referencePoint=np.array([]), discreteLevel = 0):
-        lb = np.array([-5,]*dim)
-        ub = np.array([5,]*dim)
+        lb = np.array([-5.0,]*dim)
+        ub = np.array([5.0,]*dim)
         objectives = [objective.kur1,objective.kur2]        
         problemArgs = {
                         'description':'KUR',
@@ -799,6 +801,7 @@ class Tree:
                         further
         level: An integer indicating the tree level 
         n: An integer indicating the number of sampled observations 
+        problem: A class Problem() representing the underlying problem
     Methods:
         addNode: add new leaf node to the tree
         updatePool: update the information of sampled pool of this node
@@ -821,6 +824,7 @@ class Tree:
         self.promisingIndex = np.NaN
         self.level = np.NaN
         self.n = np.NaN
+        self.problem = None
         return None
     
     def addNode(self, parent, lb, ub, problem):
@@ -944,18 +948,18 @@ class Tree:
                              each point
         """
         #determine the deminsion of point's objective
-        dim = len(self.pool[list(self.pool.keys())[0]].mean)
+        dim = len(self.problem.objectives)
         #recorganize all the visited points together into one sorted array
         _visitedPoints = utils.dictToSortedNumpyArray(self.root.visitedPoints(),dim)    
         #recorganize the points in the pool together into one sorted array 
         _pool = utils.dictToSortedNumpyArray(self.pool,dim)        
 
-        #call swig c extension (nearly 4 times faster than original python function)
-        dominationCount = _cutils.calDominationCount(_pool,_visitedPoints,len(_pool))[1]
-        
-#        #call python function
-#        dominationCount = utils.calDominationCount(_pool,_visitedPoints)
+        if self.pool:
+            #call swig c extension (nearly 4 times faster than original python function)
+            dominationCount = _cutils.calDominationCount(_pool,_visitedPoints,len(_pool))[1]        
+#            #call python function
+#            dominationCount = utils.calDominationCount(_pool,_visitedPoints)
+        else:
+            dominationCount = np.array([np.nan])
         
         return dominationCount
-
-
