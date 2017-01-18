@@ -32,7 +32,7 @@ def averageDominationCount(leaf):
         averageDominationCount: A double representing average of domination
                                 count for this leaf node  
     """
-    averageDominationCount = np.mean(leaf.calDominationCount())
+    averageDominationCount = np.nanmean(leaf.calDominationCount())
     return averageDominationCount
     
 def medianDominationCount(leaf):
@@ -43,7 +43,7 @@ def medianDominationCount(leaf):
         medianDominationCount: A double representing median of domination
                                 count for this leaf node  
     """
-    medianDominationCount = np.mean(leaf.calDominationCount())
+    medianDominationCount = np.nanmean(leaf.calDominationCount())
     return medianDominationCount    
 
 def minimumDominationCount(leaf):
@@ -53,8 +53,8 @@ def minimumDominationCount(leaf):
     Returns:
         minimumDominationCount: A double representing minimum of domination
           count for this leaf node  
-    """    
-    minimumDominationCount = np.min(leaf.calDominationCount())
+    """
+    minimumDominationCount = np.nanmin(leaf.calDominationCount())
     return minimumDominationCount  
     
 def maximumDominationCount(leaf):
@@ -65,7 +65,7 @@ def maximumDominationCount(leaf):
         maximumDominationCount: A double representing maximum of domination
           count for this leaf node  
     """
-    maximumDominationCount = np.max(leaf.calDominationCount())
+    maximumDominationCount = np.nanmax(leaf.calDominationCount())
     return maximumDominationCount        
     
 def balancedEE(leaf):
