@@ -215,8 +215,9 @@ class Core:
             #record end time of this iteration
             self.endTime.append(datetime.datetime.now()) 
             self.computationTime.append((self.endTime[-1]-self.startTime[-1]).total_seconds())            
-            #message to the screen            
-            print('Iteration %d [%s] \t Tree Level %d \t Num of LeafNodes %d \t Num of Samples %d \t PI = %.4f \t HV = %.4f \t Duration = %.2fs [%.2f,%.2f,%.2f]' %(self.currentIteration-1,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),self.currentTreeLevel,len(leafNodes),self.currentSampleSize,self.currentPI,self.hyperVolume[-1],self.computationTime[-1],t1,t2,t3))                        
+            #message to the screen 
+            trueParetoProportion = performance.calTrueParetoProportition(paretoSet, problem.trueParetoSet)
+            print('Iteration %d [%s] \t Tree Level %d \t Num of LeafNodes %d \t Num of Samples %d \t PI = %.4f \t HV = %.4f \t GO = %.4f \t Duration = %.2fs [%.2f,%.2f,%.2f]' %(self.currentIteration-1,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),self.currentTreeLevel,len(leafNodes),self.currentSampleSize,self.currentPI,self.hyperVolume[-1],trueParetoProportion,self.computationTime[-1],t1,t2,t3))                        
         #make gif animation
         if problem.dim == 2:
             try:
@@ -937,7 +938,7 @@ class Tree:
         Returns:
             A boolean value that indicates whether x is within the node
         """
-        return all(self.lb<=x) and all(x<self.ub)
+        return all(self.lb<=x) and all(x<=self.ub)
     
     @jit
     def calDominationCount(self):
