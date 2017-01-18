@@ -143,8 +143,8 @@ def updateObjAttr(obj,attr,value):
         None
     """
     setattr(obj,attr,value)
-    return
-            
+    return     
+    
 def identifyParetoSet(visitedPoints):
     """identify the Pareto Set given the visited points
     Args:
