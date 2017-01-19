@@ -393,7 +393,8 @@ class Problem:
                 point.init(p,None,self)
                 _trueParetoSet[point.key] = point
             self.trueParetoSet = _trueParetoSet
-            self.bestHyperVolume = performance.calHyperVolume(utils.paretoSetToFront(self.trueParetoSet),self.referencePoint)
+            front = [_trueParetoSet[k].trueMean for k in _trueParetoSet]            
+            self.bestHyperVolume = performance.calHyperVolume(front, self.referencePoint)
         return 
         
     def evaluate(self,x,num=1):
@@ -847,7 +848,7 @@ class Race:
             GO.append(performance.calTrueParetoProportion(paretoSet, trueParetoSet))
             HD.append(performance.calHausdorffDistance(paretoSet, trueParetoSet))        
             sampleSize.append(pop.problem.fevals)        
-            print('%s - Iteration %d \t HV = %.5f \t sampleSize = %d' % (key, len(HV), HV[-1],sampleSize[-1]))
+            print('%s - Iteration %d \t HV = %.4f \t GO = %.4f \t HD = %.4f \t sampleSize = %d' % (key, len(HV), HV[-1], GO[-1], HD[-1], sampleSize[-1]))
         results = {'sampleSize':sampleSize, 
                    'HV':HV,
                    'GO':GO,
