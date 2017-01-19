@@ -21,6 +21,7 @@ import datetime
 import time
 from numba import jit
 import os
+import copy
 
 __all__ = ['utils','rule','_cutils','objective','images2gif','visualize','performance','hv']
 
@@ -215,7 +216,7 @@ class Core:
             self.sampleSize.append(self.currentSampleSize)
             #calculate algorithm's performance metric
             self.hyperVolume.append(performance.calHyperVolume(utils.paretoSetToFront(paretoSet),problem.referencePoint))                        
-            self.trueParetoProportion.append(performance.calTrueParetoProportition(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
+            self.trueParetoProportion.append(performance.calTrueParetoProportion(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             self.hausdorffDistance.append(performance.calHausdorffDistance(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             #visualize current search progress
             if problem.dim == 2:
@@ -743,6 +744,136 @@ class Problem:
         problem.init(problemArgs)
         return problem          
 
+class Race:
+    """ Summary of class Race()
+    Attributes:
+        problemPRS: A PRS class Problem() 
+        problemGMO: A PyGMO class Problem()
+        PyGMONumPop: An integer indicating the number of population for PyGMO
+        maximumSampleSize" An integer indicating the maximum sample size
+    Methods:
+        init: initialize the arguments of the instance
+        runPRS: run PRS algorithm for once 
+        runGMO: run PyGMO algorithm for once
+        runRep: run algorithm independently for multiple times
+    """
+    def __init__(self):
+        self.problemPRS = None
+        self.problemGMO = None
+        self.PyGMONumPop = -1
+        self.maximumSampleSize = -1
+        return
+        
+    def init(self, args):
+        """ initialize the arguments of the instance
+        Args:
+            args: A dictionary of the arguments to be initialized
+        Returns:
+            None
+        """   
+        for attr in args:
+            utils.updateObjAttr(self,attr,args[attr])        
+        return
+
+    def runPRS(self, key, alg):
+        """ run PRS algorithm for once 
+        Args:
+            key: A string indicating the name of algorithm
+            alg: A class Core() of PRS algorithm
+        Returns:
+            resutls: A dictionary of algorithm's resutls
+        """
+        alg = copy.deepcopy(alg)
+        case = Case()
+        caseArgs = {
+                    'description': '%s_%s_' % (self.problemPRS.description,str(self.problemPRS.stochastic)) + key,
+                    'problem': self.problemPRS,
+                    'prs': alg,
+        }
+        case.init(caseArgs)
+        case.run()
+        visualize.All(case)        
+        HV = case.prs.hyperVolume
+        GO = case.prs.trueParetoProportion
+        HD = case.prs.hausdorffDistance
+        sampleSize = case.prs.sampleSize  
+        paretoPoint = case.results['paretoSet']
+        paretoSet = utils.paretoSetToList(paretoPoint)
+        front = utils.paretoSetToFront(paretoPoint)
+        results = {'sampleSize':sampleSize, 
+                   'HV':HV,
+                   'GO':GO,
+                   'HD':HD,
+                   'paretoSet':paretoSet,
+                   'front':front,
+                   'case':case,
+                   }
+        return results  
+
+    def runGMO(self, key, alg):
+        """ run PyGMO algorithm for once 
+        Args:
+            key: A string indicating the name of algorithm
+            alg: A PyGMO class of PyGMO algorithm
+        Returns:
+            resutls: A dictionary of algorithm's resutls
+        """        
+        import PyGMO
+        alg = copy.deepcopy(alg)        
+        pop =  PyGMO.population(self.problemGMO, self.PyGMONumPop)
+        HV, GO, HD, sampleSize, paretoSet, front = [[] for _ in range(6)]
+        LB, UB, discreteLevel = self.problemPRS.lb, self.problemPRS.ub, self.problemPRS.discreteLevel
+        trueParetoSet = utils.paretoSetToList(self.problemPRS.trueParetoSet)
+        while(pop.problem.fevals<self.maximumSampleSize):
+            pop = alg.evolve(pop)
+            # update paretoSet
+            popList = [utils.discretize([np.array(individual.cur_x)], 
+                        LB, UB, discreteLevel)[0] for individual in pop]
+            objValue = {}
+            candidateList = set([tuple(foo) for foo in paretoSet + popList])
+            paretoSet, front = [], []
+            for p in candidateList:
+                objValue[utils.generateKey(p)] = [p, self.problemPRS.evaluate(p)[0]]
+            for k1 in objValue:
+                flag = True
+                for k2 in objValue:
+                    if k2 != k1 and _cutils.dominating(objValue[k2][1], objValue[k1][1]):
+                        flag = False
+                        break
+                if flag: 
+                    paretoSet.append(objValue[k1][0])
+                    front.append(objValue[k1][1])
+            HV.append(performance.calHyperVolume(front,self.problemPRS.referencePoint))
+            GO.append(performance.calTrueParetoProportion(paretoSet, trueParetoSet))
+            HD.append(performance.calHausdorffDistance(paretoSet, trueParetoSet))        
+            sampleSize.append(pop.problem.fevals)        
+            print('%s - Iteration %d \t HV = %.5f \t sampleSize = %d' % (key, len(HV), HV[-1],sampleSize[-1]))
+        results = {'sampleSize':sampleSize, 
+                   'HV':HV,
+                   'GO':GO,
+                   'HD':HD,
+                   'paretoSet':paretoSet,
+                   'front':front,
+                   'pop':pop,
+                   }                
+        return results
+        
+    def runRep(self, key, alg, numRep):
+        """ run algorithm alg for numRep times
+        Args:
+            key: A string indicating the name of algorithm
+            alg: A PyGMO class of PyGMO algorithm
+            numRep: An integer indicating the replication times
+        Returns:
+            resutls: A list of algorithm's resutls for each replication
+        """
+        if isinstance(alg, Core):
+            results = [self.runPRS(key, alg) for _ in range(numRep)]
+        else:
+            results = [self.runGMO(key, alg) for _ in range(numRep)]
+        return [results, results[0]][numRep==1]
+              
+        
 class RuleSet:
     """summary of class RuleSet()
     Attributes:        
