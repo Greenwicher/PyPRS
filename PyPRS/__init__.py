@@ -177,7 +177,7 @@ class Core:
             #determine sample size
             sampleSize = utils.MultiThread(self.rule.sampleSize,zip(leafNodes,repeat(self.rule.sampleSizeArgs)))
             #draw samples from each leaf nodes
-            samples = utils.MultiThread(self.rule.sampleMethod,zip(leafNodes,sampleSize))
+            samples = utils.MultiThread(self.rule.sampleMethod,zip(leafNodes,sampleSize,repeat(self.rule.sampleMethodArgs)))
             t2 = time.process_time() - t 
             ### EVALUATION ###            
             t = time.process_time()              
@@ -251,6 +251,7 @@ class Core:
     def moprs(maximumSampleSize=1000,deltaSampleSize=30,unitSampleSize=5,
               stop = rule.stop.exceedMaximumSampleSize,
               sampleMethod=rule.sampleMethod.uniform,
+              sampleMethodArgs={},
               sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,
               alphaPI=0,
               partition=rule.partition.bisection,atomPartitionScale=0,
@@ -265,6 +266,7 @@ class Core:
                 'sampleSize' : sampleSize,
                 'replicationSize' : replicationSize,
                 'sampleMethod' : sampleMethod,
+                'sampleMethodArgs': sampleMethodArgs,
                 'pi' : pi,
                 'si' : rule.si.ucb,
                 'siArgs': {'ucb_c':0.5},
