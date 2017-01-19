@@ -28,7 +28,7 @@ def calHyperVolume(front, referencePoint):
         hyperVolume = 0.0
     return hyperVolume
     
-def calTrueParetoProportition(paretoSet, trueParetoSet):
+def calTrueParetoProportion(paretoSet, trueParetoSet):
     """ calculate the proportion of true Pareto solution given the estimated 
         Pareto set and true Pareto set
     Args:
@@ -69,3 +69,77 @@ def calHausdorffDistance(paretoSet, trueParetoSet):
         colDistance.append(np.min(d[:,j]))
     HausdorffDistance = np.max([np.max(rowDistance), np.max(colDistance)])
     return HausdorffDistance
+    
+def fill(x, y):
+    """ fill the empty (x, y) point given the discrete set of (x, y)
+    Args:
+        x: A list of discrete point in the xth coordinate
+        y: A list of discrete point in the yth coordinate associated with x
+    Returns:
+        y: A list of "continuous" point in the yth coordinate associated with x
+    """
+    x = [1] + x
+    y = [np.nan] + y
+    _y = []
+    for i in range(len(y)-1):
+         _y += [y[i]] * (x[i+1] - x[i])
+    _y += [y[-1]] 
+    return _y
+    
+def calEnsembleMean(results):
+    """ calculate the ensemble mean of performance based on results of 
+        different replications
+    Args:
+        results: A list of algorithm's results from different replications or 
+            A dictionary of algorithm's results for single replication
+    Returns:
+        ensembleMean: A dictionary of ensemble mean of algorithm's performance
+    """
+    ensembleMean = {}
+    y = ['HV', 'GO', 'HD']
+    for foo in y:
+        ensembleMean[foo] = calSubEnsembleMean(results, 'sampleSize', foo)
+    return ensembleMean
+    
+    
+def calSubEnsembleMean(results, x, y):
+    """ calculate the ensemble of particular performance based on results of 
+        different replications
+    Args:
+        results: A list of algorithm's results from different replications or 
+            A dictionary of algorithm's results for single replication
+        x: A string indicating the name of xth coordinate 
+        y: A string indicating the name of yth coordinate
+    Returns:
+        ensembleMean: A list of ensemble mean of algorithm's performance y  
+    """
+    # check whether single or multiple replications    
+    if isinstance(results, list):
+        samplePath = []
+        minmax = np.inf
+        # fill the path for each replication
+        for r in results:
+            try:
+                path = fill(r[x], r[y])
+                minmax = min(len(path), minmax)
+                samplePath.append(path)
+            except:
+                ensembleMean = None
+                print('Error: calSubEnsembleMean')
+                return ensembleMean
+        # calculate the ensemble mean
+        _samplePath = []
+        for path in samplePath:
+            _samplePath.append(path[:minmax])
+        ensembleMean = np.mean(np.array(_samplePath), axis=0)
+    elif isinstance(results, dict):
+        try:
+            ensembleMean = fill(results[x], results[y])
+        except:
+            ensembleMean = None
+            print('Error: calSubEnsembleMean')
+            return ensembleMean
+    else:
+        ensembleMean = None
+        print('Type Error: Invalid Type, only list/dictionary allowed')
+    return ensembleMean
