@@ -833,7 +833,7 @@ class Race:
             popList = [utils.discretize([np.array(individual.cur_x)], 
                         LB, UB, discreteLevel)[0] for individual in pop]
             objValue = {}
-            candidateList = set([tuple(foo) for foo in paretoSet + popList])
+            candidateList = paretoSet + popList
             paretoSet, front = [], []
             for p in candidateList:
                 objValue[utils.generateKey(p)] = [p, self.problemPRS.evaluate(p)[0]]
