@@ -93,7 +93,7 @@ def elite(leaf, n, args):
     paretoSet = utils.identifyParetoSet(visitedPoints) 
       
     # construct initial population
-    pop = PyGMO.population(problem, 8)
+    pop = PyGMO.population(problem, args['elite']['numPop'])
     for k in paretoSet:
         x = paretoSet[k].x
         if leaf.withinNode(x):
