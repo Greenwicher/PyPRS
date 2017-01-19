@@ -326,4 +326,24 @@ def saveWorkspace(filename):
         except Exception as e:
             print(str(e))
             print('ERROR shelving: {0}'.format(key))
-    f_shelf.close()    
+    f_shelf.close()  
+    
+def paretoSetToFront(paretoSet):
+    """ derive the Pareto front gievn a dictionary of Pareto Set
+    Args:
+        paretoSet: A dictionary of class Point() representing the Pareto set
+    Returns:
+        front: A list of "Pareto" front objectives value
+    """  
+    front = [paretoSet[k].trueMean for k in paretoSet]
+    return front
+    
+def paretoSetToList(paretoSet):
+    """ convert a dictionary of paretoSet to list
+    Args:
+        paretoSet: A dictionary of class Point() representing the Pareto set
+    Returns:
+        x: A list of decision vector of Pareto set
+    """
+    x = [paretoSet[k].x for k in paretoSet]
+    return x
