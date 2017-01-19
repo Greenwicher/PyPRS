@@ -94,7 +94,11 @@ class Core:
         computationTime: A double list indicating the duration time of 
                         algorithm/iteration
         sampleSize: An integer list indicating the number of samples at each iteration
-        hyperVolume: A doulbe list indicating the hyper volume value at each iteration
+        hyperVolume: A double list indicating the hyper volume value at each iteration
+        trueParetoProportion: A double list indicating the true Pareto proportion
+            at each iteration
+        hausdorffDistance: A double list indicating the Hausdorff distance between
+            estimated Pareto set and true Pareto set
     Methods:
         run: framework of Partition-based Random Search (PRS) algorithms
     """    
@@ -113,6 +117,8 @@ class Core:
         self.computationTime = []
         self.sampleSize = []
         self.hyperVolume = []
+        self.trueParetoProportion = []
+        self.hausdorffDistance = []
         return
     
     def init(self,args):
@@ -207,8 +213,10 @@ class Core:
             self.currentPI = min([leaf.promisingIndex for leaf in leafNodes])            
             self.currentSampleSize = sum([sum([len(leaf.pool[k].history) for k in leaf.pool]) for leaf in leafNodes])
             self.sampleSize.append(self.currentSampleSize)
-            #calculate hypervolume
-            self.hyperVolume.append(performance.calHyperVolume(paretoSet,problem.referencePoint))                        
+            #calculate algorithm's performance metric
+            self.hyperVolume.append(performance.calHyperVolume(utils.paretoSetToFront(paretoSet),problem.referencePoint))                        
+            self.trueParetoProportion.append(performance.calTrueParetoProportition(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
+            self.hausdorffDistance.append(performance.calHausdorffDistance(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             #visualize current search progress
             if problem.dim == 2:
                 visualize.generateAnimationFrame(outputDir,self.currentIteration-1,self,problem.trueParetoSetInfo)
@@ -216,8 +224,13 @@ class Core:
             self.endTime.append(datetime.datetime.now()) 
             self.computationTime.append((self.endTime[-1]-self.startTime[-1]).total_seconds())            
             #message to the screen 
-            trueParetoProportion = performance.calTrueParetoProportition(paretoSet, problem.trueParetoSet)
-            print('Iteration %d [%s] \t Tree Level %d \t Num of LeafNodes %d \t Num of Samples %d \t PI = %.4f \t HV = %.4f \t GO = %.4f \t Duration = %.2fs [%.2f,%.2f,%.2f]' %(self.currentIteration-1,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),self.currentTreeLevel,len(leafNodes),self.currentSampleSize,self.currentPI,self.hyperVolume[-1],trueParetoProportion,self.computationTime[-1],t1,t2,t3))                        
+            print('Iteration %d [%s] \t Tree Level %d \t Num of LeafNodes %d \t  \
+            Num of Samples %d \t PI = %.4f \t HV = %.4f \t GO = %.4f \t HD = %.4f \
+            \t Duration = %.2fs [%.2f,%.2f,%.2f]'  % (self.currentIteration-1,
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),self.currentTreeLevel,
+            len(leafNodes),self.currentSampleSize,self.currentPI,self.hyperVolume[-1],
+            self.trueParetoProportion[-1],self.hausdorffDistance[-1],
+            self.computationTime[-1],t1,t2,t3))                        
         #make gif animation
         if problem.dim == 2:
             try:
@@ -379,7 +392,7 @@ class Problem:
                 point.init(p,None,self)
                 _trueParetoSet[point.key] = point
             self.trueParetoSet = _trueParetoSet
-            self.bestHyperVolume = performance.calHyperVolume(self.trueParetoSet,self.referencePoint)
+            self.bestHyperVolume = performance.calHyperVolume(utils.paretoSetToFront(self.trueParetoSet),self.referencePoint)
         return 
         
     def evaluate(self,x,num=1):
