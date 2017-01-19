@@ -335,7 +335,7 @@ def paretoSetToFront(paretoSet):
     Returns:
         front: A list of "Pareto" front objectives value
     """  
-    front = [paretoSet[k].trueMean for k in paretoSet]
+    front = [paretoSet[k].mean for k in paretoSet]
     return front
     
 def paretoSetToList(paretoSet):
