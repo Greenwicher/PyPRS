@@ -12,6 +12,7 @@ from . import rule
 from .  import objective
 from . import visualize
 from . import performance
+from . import problemGMO
 from . import images2gif
 from . import hv
 import numpy as np
@@ -379,7 +380,8 @@ class Problem:
         """        
         for attr in args:
             utils.updateObjAttr(self,attr,args[attr])
-        self.trueParetoSetInfo = utils.identifyTrueParetoSet(self)
+        if self.dim == 2:
+            self.trueParetoSetInfo = utils.identifyTrueParetoSet(self)
         #find referencePoint to calculate hypervolume
         if not(self.referencePoint.size):
             objs = self.trueParetoSetInfo['objs']
@@ -689,24 +691,28 @@ class Problem:
         problem.init(problemArgs)
         return problem                      
 
-    def sch(num,isStochastic,std=1):
+    def sch(num,isStochastic,std=1,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x=[0,2]}
         """                
-        lb = np.array([-3.0])
-        ub = np.array([3.0])
+        lb = np.array([-10.0**3])
+        ub = np.array([10.0**3])
         objectives = [objective.sch1,objective.sch2]        
+        trueParetoSet = utils.discretize(np.array([x1 for x1 in np.linspace(0.0,2.0,1000)]), lb, ub, discreteLevel)
         problemArgs = {
-                        'description':'SCH',
+                        'description':'ZDT4',
                         'lb':lb,
                         'ub':ub,
                         'objectives':objectives,
                         'num': num,
                         'stochastic': isStochastic,
                         'std': std,
+                        'referencePoint': referencePoint, 
+                        'trueParetoSet': trueParetoSet,   
+                        'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
         problem.init(problemArgs)
-        return problem  
+        return problem    
         
     def pol(num,isStochastic,std=1,referencePoint=np.array([]), discreteLevel = 0):
         lb = np.array([-np.pi,-np.pi])
@@ -745,8 +751,239 @@ class Problem:
         }
         problem = Problem()
         problem.init(problemArgs)
-        return problem          
+        return problem     
+        
+    def dtlz1(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
+        """ Optimal solution = {x: x[-dim2:] = 0}
+            see "Scalable Test Problems for Evolutionary Multi-Objective Optimization"
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: 100 * (dim2 + np.sum((x - .5)**2 - np.cos(20 * np.pi * (x - .5))))
+        objectives.append(lambda x: .5 * np.product(x[:dim1]) * (1 + g(x[-dim2:])))
+        for i in range(2, obj):
+            objectives.append(lambda x: .5 * np.product(x[:dim1-i+1]) * (1 - x[dim1-i+1]) * (1 + g(x[-dim2:])))
+        objectives.append(lambda x: .5 * (1 - x[0]) * (1 + g(x[-dim2:])))
+        
+        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        bounds = np.repeat([(0,1)], dim1, axis = 0)
+        x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
+        trueParetoSet = np.concatenate((x_free, np.zeros([len(x_free), dim2])), axis=1)
+        problemArgs = {
+                        'description':'DTLZ1',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem
+        
+    def dtlz2(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
+        """ Optimal solution = {x: x[-dim2:] = 0.5}
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: np.sum((x[-dim2:] - .5) ** 2)
+        objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(x[:dim1] * np.pi / 2)))
+        for i in range(2, obj):
+            objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(x[:dim1-i+1] * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
+        objectives.append(lambda x: (1 + g(x)) * np.sin(x[0] * np.pi / 2))
+        
+        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        bounds = np.repeat([(0,1)], dim1, axis = 0)
+        x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
+        trueParetoSet = np.concatenate((x_free, .5 * np.ones([len(x_free), dim2])), axis=1)
+        problemArgs = {
+                        'description':'DTLZ2',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem       
+        
+    def dtlz3(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
+        """ Optimal solution = {x: x[-dim2:] = 0.5}
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: 100 * (dim2 + np.sum((x[-dim2:] - .5) ** 2 - np.cos(20 * np.pi * (x[-dim2:] - .5))))
+        objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(x[:dim1] * np.pi / 2)))
+        for i in range(2, obj):
+            objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(x[:dim1-i+1] * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
+        objectives.append(lambda x: (1 + g(x)) * np.sin(x[0] * np.pi / 2))
+        
+        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        bounds = np.repeat([(0,1)], dim1, axis = 0)
+        x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
+        trueParetoSet = np.concatenate((x_free, .5 * np.ones([len(x_free), dim2])), axis=1)
+        problemArgs = {
+                        'description':'DTLZ3',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem       
 
+    def dtlz4(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0, alpha=100):
+        """ Optimal solution unknown
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: np.sum((x[-dim2:] - .5) ** 2)
+        objectives.append(lambda x: (1 + g(x)) * np.product(np.cos((x[:dim1] ** alpha) * np.pi / 2)))
+        for i in range(2, obj):
+            objectives.append(lambda x: (1 + g(x)) * np.product(np.cos((x[:dim1-i+1] ** alpha) * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
+        objectives.append(lambda x: (1 + g(x)) * np.sin((x[0] ** alpha) * np.pi / 2))
+        trueParetoSet = None
+        problemArgs = {
+                        'description':'DTLZ4',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem   
+        
+    def dtlz5(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
+        """ Optimal solution unknown
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: np.sum((x[-dim2:] - .5) ** 2)
+        theta = lambda x1, x2: np.pi / 4 / (1 + g(x2)) * (1 + 2 * g(x2) * x1)
+        objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(theta(x[:dim1], x[-dim2:]) * np.pi / 2)))
+        for i in range(2, obj):
+            objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(theta(x[:dim1-i+1], x[-dim2:]) * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
+        objectives.append(lambda x: (1 + g(x)) * np.sin(theta(x[0], x[-dim2:]) * np.pi / 2))
+
+        trueParetoSet = None
+        problemArgs = {
+                        'description':'DTLZ5',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem       
+        
+    def dtlz6(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
+        """ Optimal solution unknown
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: np.sum(x[-dim2:] ** 0.1)
+        theta = lambda x1, x2: np.pi / 4 / (1 + g(x2)) * (1 + 2 * g(x2) * x1)
+        objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(theta(x[:dim1], x[-dim2:]) * np.pi / 2)))
+        for i in range(2, obj):
+            objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(theta(x[:dim1-i+1], x[-dim2:]) * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
+        objectives.append(lambda x: (1 + g(x)) * np.sin(theta(x[0], x[-dim2:]) * np.pi / 2))
+
+        trueParetoSet = None
+        problemArgs = {
+                        'description':'DTLZ6',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem       
+        
+    def dtlz7(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
+        """ Optimal solution = {x: x[-dim2:] = 0}
+        """
+        lb = np.array([0.0,]*dim)
+        ub = np.array([1.0,]*dim)
+        dim1, dim2 = obj - 1, dim - obj + 1
+        objectives = []
+        g = lambda x: 1 + 9 / dim2 * np.sum(x)
+        for i in range(obj-1):
+            objectives.append(lambda x: x[i])
+        h = lambda x: obj - np.sum([f(x) / (1 + g(x)) * (1 + np.sin(3 * np.pi * f(x))) for f in objectives]) 
+        objectives.append(lambda x: (1 + g(x)) * h(x))
+
+        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        bounds = np.repeat([(0,1)], dim1, axis = 0)
+        x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
+        trueParetoSet = np.concatenate((x_free, np.zeros([len(x_free), dim2])), axis=1)
+        problemArgs = {
+                        'description':'DTLZ7',
+                        'lb':lb,
+                        'ub':ub,
+                        'objectives':objectives,
+                        'num': num,
+                        'stochastic': isStochastic,
+                        'std': std,
+                        'referencePoint': referencePoint,   
+                        'trueParetoSet': trueParetoSet,  
+                        'dim': dim,  
+                        'discreteLevel': discreteLevel,
+        }
+        problem = Problem()
+        problem.init(problemArgs)
+        return problem       
+        
 class Race:
     """ Summary of class Race()
     Attributes:
