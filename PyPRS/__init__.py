@@ -991,6 +991,7 @@ class Race:
         problemGMO: A PyGMO class Problem()
         PyGMONumPop: An integer indicating the number of population for PyGMO
         maximumSampleSize" An integer indicating the maximum sample size
+        dir: A string indicating the output directory
     Methods:
         init: initialize the arguments of the instance
         runPRS: run PRS algorithm for once 
@@ -1002,6 +1003,7 @@ class Race:
         self.problemGMO = None
         self.PyGMONumPop = -1
         self.maximumSampleSize = -1
+        self.dir = ''
         return
         
     def init(self, args):
@@ -1012,7 +1014,15 @@ class Race:
             None
         """   
         for attr in args:
-            utils.updateObjAttr(self,attr,args[attr])        
+            utils.updateObjAttr(self,attr,args[attr])   
+        # new output directory
+        if self.output:
+            self.dir = 'output/%s (xdim=%d, ydim=%d, discrete=%d, stochastic=%s) - %s/' \
+            % (self.problemPRS.description, self.problemPRS.dim, 
+               len(self.problemPRS.objectives), self.problemPRS.discreteLevel,
+               str(self.problemPRS.stochastic), datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+            if not os.path.exists(self.dir):
+                os.makedirs(self.dir)                       
         return
 
     def runPRS(self, key, alg):
@@ -1048,6 +1058,7 @@ class Race:
                    'front':front,
                    'case':case,
                    }
+        if self.output: self.archive(key, results)
         return results  
 
     def runGMO(self, key, alg):
@@ -1095,7 +1106,9 @@ class Race:
                    'paretoSet':paretoSet,
                    'front':front,
                    'pop':pop,
-                   }                
+                   }   
+        if self.output: 
+            self.archive(key, results)                   
         return results
         
     def runRep(self, key, alg, numRep):
@@ -1112,6 +1125,39 @@ class Race:
         else:
             results = [self.runGMO(key, alg) for _ in range(numRep)]
         return [results, results[0]][numRep==1]
+        
+    def archive(self, key, results):
+        """ store the archive information of single sample path
+        Args:
+            key: A string of algorithm's name
+            results: A dictionary storing the algorithm's output
+        Returns:
+            None
+        """
+        import time
+        time.sleep(1)
+        filename = '%s - %s' % (key, datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+        # write output to txt files
+        f_txt = open(self.dir + filename + '.txt', "w", encoding='utf8')
+        #for key in ['paretoSet', 'front', 'sampleSize', 'HV', 'GO', 'HD']:
+        for key in results:
+            try:
+                for foo in results[key]:
+                    f_txt.write('%s %s\n' % (key, str(foo)))
+            except Exception as e:
+                print('Archive error: ', e)
+            f_txt.write('\n'*5)
+        f_txt.close()
+        # write output to db
+        import shelve
+        f_db = shelve.open(self.dir + filename, 'n')
+        try:
+            f_db['key'] = locals()['key']
+            f_db['results'] = locals()['results']
+        except Exception as e:
+            print(str(e))
+        f_db.close()          
+        return
               
         
 class RuleSet:
