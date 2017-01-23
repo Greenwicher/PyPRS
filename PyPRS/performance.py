@@ -38,14 +38,17 @@ def calTrueParetoProportion(paretoSet, trueParetoSet):
         trueParetoProportition: A double indicating the proportion of true 
         Pareto solution given the estimated Pareto set and true Pareto set
     """
-    paretoSetKey = set()
-    trueParetoSetKey = set()
-    for x in paretoSet:
-        paretoSetKey.add(utils.generateKey(x))
-    for x in trueParetoSet:
-        trueParetoSetKey.add(utils.generateKey(x))
-    trueParetoProportition = len(paretoSetKey & trueParetoSetKey) / len(trueParetoSetKey)
-    return trueParetoProportition
+    if trueParetoSet:
+        paretoSetKey = set()
+        trueParetoSetKey = set()
+        for x in paretoSet:
+            paretoSetKey.add(utils.generateKey(x))
+        for x in trueParetoSet:
+            trueParetoSetKey.add(utils.generateKey(x))
+        trueParetoProportion = len(paretoSetKey & trueParetoSetKey) / len(trueParetoSetKey)
+    else:
+        trueParetoProportion = np.nan
+    return trueParetoProportion
     
 def calHausdorffDistance(paretoSet, trueParetoSet):
     """ calculate Hausdorff distance (see https://en.wikipedia.org/wiki/Hausdorff_distance)
@@ -56,18 +59,21 @@ def calHausdorffDistance(paretoSet, trueParetoSet):
     Returns:
         HausdorffDistance: A double indicating Hausdorff distance
     """    
-    m, n = len(paretoSet), len(trueParetoSet)
-    d = [[np.nan] * n for _ in range(m)]
-    for i in range(m):
+    if trueParetoSet:
+        m, n = len(paretoSet), len(trueParetoSet)
+        d = [[np.nan] * n for _ in range(m)]
+        for i in range(m):
+            for j in range(n):
+                d[i][j] = np.linalg.norm(paretoSet[i] - trueParetoSet[j])
+        d = np.array(d)
+        rowDistance, colDistance = [], []
+        for i in range(m):
+            rowDistance.append(np.min(d[i]))
         for j in range(n):
-            d[i][j] = np.linalg.norm(paretoSet[i] - trueParetoSet[j])
-    d = np.array(d)
-    rowDistance, colDistance = [], []
-    for i in range(m):
-        rowDistance.append(np.min(d[i]))
-    for j in range(n):
-        colDistance.append(np.min(d[:,j]))
-    HausdorffDistance = np.max([np.max(rowDistance), np.max(colDistance)])
+            colDistance.append(np.min(d[:,j]))
+        HausdorffDistance = np.max([np.max(rowDistance), np.max(colDistance)])
+    else:
+        HausdorffDistance = np.nan
     return HausdorffDistance
     
 def fill(x, y):

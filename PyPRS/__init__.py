@@ -213,7 +213,8 @@ class Core:
             self.currentIteration += 1
             self.currentTreeLevel = max([leaf.level for leaf in leafNodes])
             self.currentPI = min([leaf.promisingIndex for leaf in leafNodes])            
-            self.currentSampleSize = sum([sum([len(leaf.pool[k].history) for k in leaf.pool]) for leaf in leafNodes])
+            visitedPoints = self.tree.root.visitedPoints()
+            self.currentSampleSize = sum([len(visitedPoints[k].history) for k in visitedPoints])
             self.sampleSize.append(self.currentSampleSize)
             #calculate algorithm's performance metric
             self.hyperVolume.append(performance.calHyperVolume(utils.paretoSetToFront(paretoSet),problem.referencePoint))                        
@@ -699,7 +700,7 @@ class Problem:
         objectives = [objective.sch1,objective.sch2]        
         trueParetoSet = utils.discretize(np.array([x1 for x1 in np.linspace(0.0,2.0,1000)]), lb, ub, discreteLevel)
         problemArgs = {
-                        'description':'ZDT4',
+                        'description':'SCH',
                         'lb':lb,
                         'ub':ub,
                         'objectives':objectives,
@@ -708,7 +709,8 @@ class Problem:
                         'std': std,
                         'referencePoint': referencePoint, 
                         'trueParetoSet': trueParetoSet,   
-                        'discreteLevel': discreteLevel,                        
+                        'discreteLevel': discreteLevel, 
+                        'dim': 1,
         }
         problem = Problem()
         problem.init(problemArgs)
@@ -754,23 +756,23 @@ class Problem:
         return problem     
         
     def dtlz1(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
-        """ Optimal solution = {x: x[-dim2:] = 0}
+        """ Optimal solution = {x: x[-dim2:] = 0.5}
             see "Scalable Test Problems for Evolutionary Multi-Objective Optimization"
         """
         lb = np.array([0.0,]*dim)
         ub = np.array([1.0,]*dim)
         dim1, dim2 = obj - 1, dim - obj + 1
         objectives = []
-        g = lambda x: 100 * (dim2 + np.sum((x - .5)**2 - np.cos(20 * np.pi * (x - .5))))
-        objectives.append(lambda x: .5 * np.product(x[:dim1]) * (1 + g(x[-dim2:])))
+        g = lambda x: 100 * (dim2 + np.sum((x[-dim2:] - .5)**2 - np.cos(20 * np.pi * (x[-dim2:] - .5))))
+        objectives.append(lambda x: .5 * np.product(x[:dim1]) * (1 + g(x)))
         for i in range(2, obj):
-            objectives.append(lambda x: .5 * np.product(x[:dim1-i+1]) * (1 - x[dim1-i+1]) * (1 + g(x[-dim2:])))
-        objectives.append(lambda x: .5 * (1 - x[0]) * (1 + g(x[-dim2:])))
+            objectives.append(lambda x: .5 * np.product(x[:dim1-i+1]) * (1 - x[dim1-i+1]) * (1 + g(x)))
+        objectives.append(lambda x: .5 * (1 - x[0]) * (1 + g(x)))
         
-        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        n_bins = [discreteLevel+1, 100][discreteLevel == 0] * np.ones(dim1)
         bounds = np.repeat([(0,1)], dim1, axis = 0)
         x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
-        trueParetoSet = np.concatenate((x_free, np.zeros([len(x_free), dim2])), axis=1)
+        trueParetoSet = np.concatenate((x_free, .5 * np.ones([len(x_free), dim2])), axis=1)
         problemArgs = {
                         'description':'DTLZ1',
                         'lb':lb,
@@ -801,7 +803,7 @@ class Problem:
             objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(x[:dim1-i+1] * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
         objectives.append(lambda x: (1 + g(x)) * np.sin(x[0] * np.pi / 2))
         
-        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        n_bins = [discreteLevel+1, 100][discreteLevel == 0] * np.ones(dim1)
         bounds = np.repeat([(0,1)], dim1, axis = 0)
         x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
         trueParetoSet = np.concatenate((x_free, .5 * np.ones([len(x_free), dim2])), axis=1)
@@ -835,7 +837,7 @@ class Problem:
             objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(x[:dim1-i+1] * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
         objectives.append(lambda x: (1 + g(x)) * np.sin(x[0] * np.pi / 2))
         
-        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
+        n_bins = [discreteLevel+1, 100][discreteLevel == 0] * np.ones(dim1)
         bounds = np.repeat([(0,1)], dim1, axis = 0)
         x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
         trueParetoSet = np.concatenate((x_free, .5 * np.ones([len(x_free), dim2])), axis=1)
@@ -868,7 +870,7 @@ class Problem:
         for i in range(2, obj):
             objectives.append(lambda x: (1 + g(x)) * np.product(np.cos((x[:dim1-i+1] ** alpha) * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
         objectives.append(lambda x: (1 + g(x)) * np.sin((x[0] ** alpha) * np.pi / 2))
-        trueParetoSet = None
+        trueParetoSet = np.array([])
         problemArgs = {
                         'description':'DTLZ4',
                         'lb':lb,
@@ -900,7 +902,7 @@ class Problem:
             objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(theta(x[:dim1-i+1], x[-dim2:]) * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
         objectives.append(lambda x: (1 + g(x)) * np.sin(theta(x[0], x[-dim2:]) * np.pi / 2))
 
-        trueParetoSet = None
+        trueParetoSet = np.array([])
         problemArgs = {
                         'description':'DTLZ5',
                         'lb':lb,
@@ -932,7 +934,7 @@ class Problem:
             objectives.append(lambda x: (1 + g(x)) * np.product(np.cos(theta(x[:dim1-i+1], x[-dim2:]) * np.pi / 2)) * np.sin(x[dim1-i+1] * np.pi / 2))
         objectives.append(lambda x: (1 + g(x)) * np.sin(theta(x[0], x[-dim2:]) * np.pi / 2))
 
-        trueParetoSet = None
+        trueParetoSet = np.array([])
         problemArgs = {
                         'description':'DTLZ6',
                         'lb':lb,
@@ -951,7 +953,7 @@ class Problem:
         return problem       
         
     def dtlz7(num,isStochastic,std=1,dim=2,obj=2,referencePoint=np.array([]), discreteLevel = 0):
-        """ Optimal solution = {x: x[-dim2:] = 0}
+        """ Optimal solution unknown
         """
         lb = np.array([0.0,]*dim)
         ub = np.array([1.0,]*dim)
@@ -960,13 +962,10 @@ class Problem:
         g = lambda x: 1 + 9 / dim2 * np.sum(x)
         for i in range(obj-1):
             objectives.append(lambda x: x[i])
-        h = lambda x: obj - np.sum([f(x) / (1 + g(x)) * (1 + np.sin(3 * np.pi * f(x))) for f in objectives]) 
+        h = lambda x: obj - np.sum(x[:dim1] / (1 + g(x)) * (1 + np.sin(3 * np.pi * x[:dim1]))) 
         objectives.append(lambda x: (1 + g(x)) * h(x))
 
-        n_bins = [discreteLevel, 100][discreteLevel == 0] * np.ones(dim1)
-        bounds = np.repeat([(0,1)], dim1, axis = 0)
-        x_free = np.mgrid[[slice(row[0], row[1], n*1j) for row, n in zip(bounds, n_bins)]].reshape(dim1,-1).T
-        trueParetoSet = np.concatenate((x_free, np.zeros([len(x_free), dim2])), axis=1)
+        trueParetoSet = np.array([])
         problemArgs = {
                         'description':'DTLZ7',
                         'lb':lb,
