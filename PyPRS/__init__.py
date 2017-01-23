@@ -61,8 +61,8 @@ class Case:
         for attr in args:
             utils.updateObjAttr(self,attr,args[attr])
         #creater buffer directory to save the workspace and output
-        self.dir = 'output/'+self.description + '_' +datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        if not os.path.exists(self.dir):
+        if not(self.dir): self.dir = 'output/'+self.description + '_' +datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        if self.problem.dim ==2 and not(os.path.exists(self.dir)):
             os.makedirs(self.dir)            
         return 
         
@@ -1015,13 +1015,13 @@ class Race:
         for attr in args:
             utils.updateObjAttr(self,attr,args[attr])   
         # new output directory
-        if self.output:
+        if not(self.dir):
             self.dir = 'output/%s (xdim=%d, ydim=%d, discrete=%d, stochastic=%s) - %s/' \
             % (self.problemPRS.description, self.problemPRS.dim, 
                len(self.problemPRS.objectives), self.problemPRS.discreteLevel,
                str(self.problemPRS.stochastic), datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-            if not os.path.exists(self.dir):
-                os.makedirs(self.dir)                       
+        if self.output and not(os.path.exists(self.dir)):
+            os.makedirs(self.dir)                       
         return
 
     def runPRS(self, key, alg):
@@ -1038,6 +1038,7 @@ class Race:
                     'description': '%s_%s_' % (self.problemPRS.description,str(self.problemPRS.stochastic)) + key,
                     'problem': self.problemPRS,
                     'prs': alg,
+                    'dir': self.dir + key + '-' +datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),        
         }
         case.init(caseArgs)
         case.run()

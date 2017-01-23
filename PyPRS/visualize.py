@@ -373,7 +373,7 @@ def HVAll(problemKey,CASE):
     plt.close()      
     return 
     
-def plotConvergence(problemKey, yName, y, title, bestY = np.nan):
+def plotConvergence(problemKey, yName, y, title, bestY = np.nan, outputdir='output/'):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     miny, maxy = np.inf, -np.inf
@@ -400,8 +400,8 @@ def plotConvergence(problemKey, yName, y, title, bestY = np.nan):
     ax.set_ylim([miny - 0.1 * (maxy - miny), maxy + 0.1 * (maxy - miny)])
     ax.set_xlim([1, len(x)])
     fig.set_size_inches(12, 8)
-    fig.savefig('output/algo-comparison-%s-%s.png' % (problemKey, yName), dpi=200, bbox_inches="tight", additional_artist=[lgd]) 
-    fig.savefig('output/algo-comparison-%s-%s.eps' % (problemKey, yName), dpi=200, bbox_inches="tight", additional_artist=[lgd]) 
+    fig.savefig(outputdir+'algo-comparison-%s-%s.png' % (problemKey, yName), dpi=200, bbox_inches="tight", additional_artist=[lgd]) 
+    fig.savefig(outputdir+'algo-comparison-%s-%s.eps' % (problemKey, yName), dpi=200, bbox_inches="tight", additional_artist=[lgd]) 
     plt.close()
     return 
     
