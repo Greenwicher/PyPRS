@@ -9,6 +9,7 @@
 from .. import utils
 import numpy as np
 from itertools import repeat
+from .. import _cutils
 
 ###DOMINATION COUNT###
 
@@ -95,3 +96,25 @@ def balancedEE(leaf):
     balancedV = leafExploitationRank + leafExplorationRank
     print(leafExploitationRank, leafExplorationRank)
     return balancedV
+    
+def isPareto(leaf):
+    """ check whether the leaf contains the Pareto solution or not
+    Args:
+        leaf: A class Tree() representing leaf node region
+    Returns:
+        flag: A boolean indicating whether the leaf contains the Pareto solution
+    """    
+    # determine the deminsion of point's objective
+    dim = len(leaf.problem.objectives)       
+    # recorganize all the visited points together into one sorted array
+    _visitedPoints = utils.dictToSortedNumpyArray(leaf.visitedPoints(),dim)      
+    # check whether the leaf contains the Pareto solution
+    flag = 0
+    pool = leaf.pool
+    for key in pool:
+        _p = np.array([pool[key].mean])
+        dominantionCount = _cutils.calDominationCount(_p, _visitedPoints, len(_p))[1][0] 
+        if dominantionCount == 0: 
+            flag = 1
+            break            
+    return flag
