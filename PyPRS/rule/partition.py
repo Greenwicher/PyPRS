@@ -126,5 +126,5 @@ def nextDim(leaf, args):
         dim = candidate[np.random.randint(0,len(candidate))]
     else:
         dim = np.random.randint(0,dimX)
-    print('Select Dim %d with maxDiff %.2f, range %.2f at level %d' % (dim, maxDiff, ub[dim]-lb[dim],leaf.level))
+    #print('Select Dim %d with maxDiff %.2f, range %.2f at level %d' % (dim, maxDiff, ub[dim]-lb[dim],leaf.level))
     return dim
