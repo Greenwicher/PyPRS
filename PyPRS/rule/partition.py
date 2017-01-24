@@ -8,7 +8,8 @@
 """
 
 import numpy as np
-from . import pi
+from .. import utils
+from .. import _cutils
 
 def bisection(leaf, args):
     """ Partition a given bounded hyperbox region into two subregions based
@@ -68,7 +69,7 @@ def xsection(leaf, args):
         for j in range(dimX):
             _lb = np.append(_lb, lb[j] + (unit * i) * (j == dimID))
             _ub = np.append(_ub, ub[j] - (unit * (x - i - 1)) * (j == dimID))
-        subRegions.append([_lb,_ub])
+        subRegions.append([_lb,_ub])      
     return {'parent':leaf,'thr':[unit * i for i in range(x)],'subRegions':subRegions}    
             
 def nextDim(leaf, args):
@@ -86,6 +87,15 @@ def nextDim(leaf, args):
     dimX = len(lb) # the number of dimension
     visitedPoints = leaf.visitedPoints() # all the visited points in the tree
     pool = leaf.pool # the visited points in this leaf
+    #determine the deminsion of point's objective
+    dim = len(leaf.problem.objectives)    
+    #recorganize all the visited points together into one sorted array
+    _visitedPoints = utils.dictToSortedNumpyArray(visitedPoints,dim)        
+    # calculate the domination count for each point in this pool
+    dominantionCount = {}    
+    for key in pool:
+        _p = np.array([pool[key].mean])
+        dominantionCount[key] = _cutils.calDominationCount(_p, _visitedPoints, len(_p))[1][0]
     # enumerate all the possible next dimension to partition
     for dimID in range(dimX):
         # determine the partition unit distance 
@@ -103,8 +113,7 @@ def nextDim(leaf, args):
             for key in pool:
                 p = pool[key]                
                 if all(_lb <= p.x) and all(p.x < ub):
-                    dominantionCount = pi.calDominationCount(p,visitedPoints)
-                    poolDominantionCount.append(dominantionCount)
+                    poolDominantionCount.append(dominantionCount[key])
             # calculate the promising index in this subregion            
             promisingIndex.append(np.nanmin(poolDominantionCount))
         # calculate the dimDiff for the dimension dimID            
