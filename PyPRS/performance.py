@@ -92,23 +92,24 @@ def fill(x, y):
     _y += [y[-1]] 
     return _y
     
-def calEnsembleMean(results):
+def calEnsembleMean(results, minLength = 0):
     """ calculate the ensemble mean of performance based on results of 
         different replications
     Args:
         results: A list of algorithm's results from different replications or 
             A dictionary of algorithm's results for single replication
+        minLength: An integer representing the required minimum length of path
     Returns:
         ensembleMean: A dictionary of ensemble mean of algorithm's performance
     """
     ensembleMean = {}
     y = ['HV', 'GO', 'HD']
     for foo in y:
-        ensembleMean[foo] = calSubEnsembleMean(results, 'sampleSize', foo)
+        ensembleMean[foo] = calSubEnsembleMean(results, 'sampleSize', foo, minLength)
     return ensembleMean
     
     
-def calSubEnsembleMean(results, x, y):
+def calSubEnsembleMean(results, x, y, minLength = 0):
     """ calculate the ensemble of particular performance based on results of 
         different replications
     Args:
@@ -116,6 +117,7 @@ def calSubEnsembleMean(results, x, y):
             A dictionary of algorithm's results for single replication
         x: A string indicating the name of xth coordinate 
         y: A string indicating the name of yth coordinate
+        minLength: An integer representing the required minimum length of path        
     Returns:
         ensembleMean: A list of ensemble mean of algorithm's performance y  
     """
@@ -127,8 +129,12 @@ def calSubEnsembleMean(results, x, y):
         for r in results:
             try:
                 path = fill(r[x], r[y])
-                minmax = min(len(path), minmax)
-                samplePath.append(path)
+                # only keep the sample path if its length >= minLength
+                if len(path) >= minLength:
+                    minmax = min(len(path), minmax)
+                    samplePath.append(path)
+                else:
+                    continue
             except:
                 ensembleMean = None
                 print('Error: calSubEnsembleMean')
