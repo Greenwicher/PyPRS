@@ -180,9 +180,9 @@ class Core:
             #draw samples from each leaf nodes
             samples = utils.MultiThread(self.rule.sampleMethod,zip(leafNodes,sampleSize,repeat(self.rule.sampleMethodArgs)))
             t2 = time.time() - t 
-            ### EVALUATION ###            
-            t = time.time()              
-            #evaluate samples in each leaf        
+            ### EVALUATION ###  
+            t = time.time()                      
+            #evaluate samples in each leaf         
             for spl in samples:
                 #observe spls multi-objectives
                 points = spl['samples']
@@ -193,10 +193,13 @@ class Core:
                     repSize = self.rule.replicationSize(node,points,self.MPR,self.rule.replicationSizeArgs)
                 else:
                     #deterministic case
-                    repSize = np.array([1]*len(points))                              
-                objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))                
+                    repSize = np.array([1]*len(points))                            
+                #objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))  #not efficient than the following methods          
+                objectives = []
+                for i in range(len(points)):
+                    objectives.append(problem.evaluate(points[i], repSize[i]))
                 #update pool for each node                            
-                node.updatePool(points,objectives,problem) 
+                node.updatePool(points,objectives,problem)                            
             #identify current Pareto set and draw more replications for them
 #            if problem.stochastic:
 #                paretoSet = utils.identifyParetoSetParallel(self.tree)                 
@@ -206,8 +209,8 @@ class Core:
 #                node.updatePool(points,objectives,problem) 
             paretoSet = utils.identifyParetoSetParallel(self.tree)                      
             #update promising index                       
-            promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))              
-            utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))             
+            promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))                         
+            utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))    
             t3 = time.time() - t 
             ### OTHERS - Iteration Update ###    
             t = time.time()
