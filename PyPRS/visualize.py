@@ -377,10 +377,10 @@ def plotConvergence(problemKey, yName, y, title, bestY = np.nan, outputdir='outp
     fig = plt.figure()
     ax = fig.add_subplot(111)
     miny, maxy = np.inf, -np.inf
-    N = len(y[list(y.keys())[0]]['ensemble'])
-    x = list(range(1, N + 1))
     for key in y:
-        markers_on = list(np.linspace(1, N - 1, 10))
+        N = len(y[key]['ensemble'])
+        x = list(range(1, N + 1))        
+        markers_on = list(np.linspace(1, N - 1, 10))        
         plt.plot(x, y[key]['ensemble'], color=y[key]['color'], ls='-', linewidth=1)        
         plt.plot(np.array(x)[markers_on], np.array(y[key]['ensemble'])[markers_on], 
                  color=y[key]['color'], marker=y[key]['marker'], 
