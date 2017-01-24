@@ -225,7 +225,8 @@ class Core:
             self.trueParetoProportion.append(performance.calTrueParetoProportion(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             self.hausdorffDistance.append(performance.calHausdorffDistance(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             #visualize current search progress
-            if problem.dim == 2:
+            if problem.dim == 2 and self.rule.animationOn:
+                print(self.rule.animationOn)
                 visualize.generateAnimationFrame(outputDir,self.currentIteration-1,self,problem.trueParetoSetInfo)
             #record end time of this iteration
             self.endTime.append(datetime.datetime.now()) 
@@ -240,7 +241,7 @@ class Core:
             self.trueParetoProportion[-1],self.hausdorffDistance[-1],
             self.computationTime[-1],t1,t2,t3,t4))                        
         #make gif animation
-        if problem.dim == 2:
+        if problem.dim == 2 and self.rule.animationOn:
             try:
                 visualize.generateAnimation(outputDir)
             except Exception as e:
@@ -263,7 +264,8 @@ class Core:
               alphaPI=0,
               partition=rule.partition.bisection,atomPartitionScale=0,
               replicationSize=rule.replicationSize.equal,unitReplicationSize=5,replicationTimes=5,
-              partitionArgs={}):
+              partitionArgs={},
+              animationOn=True):
         #define rules
         ruleArgs = {
                 'description' : 'Default Rule',
@@ -287,6 +289,7 @@ class Core:
                 'alphaPI': alphaPI,
                 'atomPartitionScale': atomPartitionScale,
                 'partitionArgs': partitionArgs,
+                'animationOn': animationOn,
             }
         r = RuleSet()
         r.init(ruleArgs)
@@ -1185,6 +1188,7 @@ class RuleSet:
         siArgs: A dictionary of arguments of function si()
         alphaPI: A double incidating the percentile to determine promising index
         atomPartitionScale: A double indicating the smallest scale of atom leaf node region
+        animationOn: A boolean indicating whether to generate the 2D animation
     Methods:
         init: initialize the arguments of the instance
     """
@@ -1205,7 +1209,8 @@ class RuleSet:
         self.si = None
         self.siArgs = {}  
         self.alphaPI = 0
-        self.atomPartitionScale = 0            
+        self.atomPartitionScale = 0 
+        self.animationOn = True           
         return
         
     def init(self,args):
