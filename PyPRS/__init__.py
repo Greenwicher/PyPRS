@@ -153,13 +153,13 @@ class Core:
             #record start time of this iteration
             self.startTime.append(datetime.datetime.now())            
             ### PARTIONING ####
-            t = time.process_time()
+            t = time.time()
             #determine MPR
             self.MPR = utils.identifyMPR(self.tree,self.rule.alphaPI)
             #exclude too small MPR
-            largeMPR = [leafMPR for leafMPR in self.MPR if max(leafMPR.ub-leafMPR.lb) > self.rule.atomPartitionScale]
+            largeMPR = [leafMPR for leafMPR in self.MPR if max(leafMPR.ub-leafMPR.lb) > self.rule.atomPartitionScale]          
             #partition MPR into subregions
-            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR, repeat(self.rule.partitionArgs)))
+            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR, repeat(self.rule.partitionArgs)))          
             #add new node into the Tree
             for MPR in subregions:
                 parent = MPR['parent']
@@ -167,10 +167,10 @@ class Core:
                 #add new children nodes
                 for sub in MPR['subRegions']:                     
                     _node = Tree()
-                    _node.addNode(parent,sub[0],sub[1],problem)
-            t1 = time.process_time() - t 
+                    _node.addNode(parent,sub[0],sub[1],problem)                
+            t1 = time.time() - t 
             ### SAMPLING ###     
-            t = time.process_time()
+            t = time.time()
             leafNodes = self.tree.leafNodes() #update leaf nodes
             #update sampling index
             samplingIndex = utils.MultiThread(self.rule.si,zip(leafNodes,repeat(self.rule.siArgs)))                      
@@ -179,9 +179,9 @@ class Core:
             sampleSize = utils.MultiThread(self.rule.sampleSize,zip(leafNodes,repeat(self.rule.sampleSizeArgs)))
             #draw samples from each leaf nodes
             samples = utils.MultiThread(self.rule.sampleMethod,zip(leafNodes,sampleSize,repeat(self.rule.sampleMethodArgs)))
-            t2 = time.process_time() - t 
+            t2 = time.time() - t 
             ### EVALUATION ###            
-            t = time.process_time()              
+            t = time.time()              
             #evaluate samples in each leaf        
             for spl in samples:
                 #observe spls multi-objectives
@@ -208,8 +208,9 @@ class Core:
             #update promising index                       
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))              
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))             
-            t3 = time.process_time() - t 
-            ### OTHERS - Iteration Update ###        
+            t3 = time.time() - t 
+            ### OTHERS - Iteration Update ###    
+            t = time.time()
             self.currentIteration += 1
             self.currentTreeLevel = max([leaf.level for leaf in leafNodes])
             self.currentPI = min([leaf.promisingIndex for leaf in leafNodes])            
@@ -225,15 +226,16 @@ class Core:
                 visualize.generateAnimationFrame(outputDir,self.currentIteration-1,self,problem.trueParetoSetInfo)
             #record end time of this iteration
             self.endTime.append(datetime.datetime.now()) 
-            self.computationTime.append((self.endTime[-1]-self.startTime[-1]).total_seconds())            
+            self.computationTime.append((self.endTime[-1]-self.startTime[-1]).total_seconds())   
+            t4 = time.time() - t
             #message to the screen 
             print('Iteration %d [%s] \t Tree Level %d \t Num of LeafNodes %d \t  \
             Num of Samples %d \t PI = %.4f \t HV = %.4f \t GO = %.4f \t HD = %.4f \
-            \t Duration = %.2fs [%.2f,%.2f,%.2f]'  % (self.currentIteration-1,
+            \t Duration = %.2fs [%.2f,%.2f,%.2f,%.2f]'  % (self.currentIteration-1,
             datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),self.currentTreeLevel,
             len(leafNodes),self.currentSampleSize,self.currentPI,self.hyperVolume[-1],
             self.trueParetoProportion[-1],self.hausdorffDistance[-1],
-            self.computationTime[-1],t1,t2,t3))                        
+            self.computationTime[-1],t1,t2,t3,t4))                        
         #make gif animation
         if problem.dim == 2:
             try:
@@ -1075,7 +1077,8 @@ class Race:
         HV, GO, HD, sampleSize, paretoSet, front = [[] for _ in range(6)]
         LB, UB, discreteLevel = self.problemPRS.lb, self.problemPRS.ub, self.problemPRS.discreteLevel
         trueParetoSet = utils.paretoSetToList(self.problemPRS.trueParetoSet)
-        while(pop.problem.fevals<self.maximumSampleSize):
+        t = 0
+        while(max(pop.problem.fevals, t) < self.maximumSampleSize):
             pop = alg.evolve(pop)
             # update paretoSet
             popList = [utils.discretize([np.array(individual.cur_x)], 
@@ -1097,7 +1100,8 @@ class Race:
             HV.append(performance.calHyperVolume(front,self.problemPRS.referencePoint))
             GO.append(performance.calTrueParetoProportion(paretoSet, trueParetoSet))
             HD.append(performance.calHausdorffDistance(paretoSet, trueParetoSet))        
-            sampleSize.append(pop.problem.fevals)        
+            sampleSize.append(pop.problem.fevals)    
+            t += 1
             print('%s - Iteration %d \t HV = %.4f \t GO = %.4f \t HD = %.4f \t sampleSize = %d' % (key, len(HV), HV[-1], GO[-1], HD[-1], sampleSize[-1]))
         results = {'sampleSize':sampleSize, 
                    'HV':HV,
