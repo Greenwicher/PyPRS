@@ -22,6 +22,7 @@ def calDominationCount(p,visitedPoints):
     """
     isDominated = utils.MultiThread(utils.dominating, zip([visitedPoints[k].mean for k in visitedPoints],repeat(p.mean)))
     dominationCount = sum(isDominated)
+    print('Please _cutils.calDominantionCount(). This method is too slow.')
     return dominationCount
 
 def averageDominationCount(leaf):
