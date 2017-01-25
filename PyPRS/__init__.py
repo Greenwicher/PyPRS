@@ -1150,7 +1150,7 @@ class Race:
         """
         import time
         time.sleep(1)
-        filename = '%s - %s' % (key, datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+        filename = '%s_%s' % (key, datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
         # write output to txt files
         f_txt = open(self.dir + filename + '.txt', "w", encoding='utf8')
         #for key in ['paretoSet', 'front', 'sampleSize', 'HV', 'GO', 'HD']:
@@ -1172,6 +1172,45 @@ class Race:
             print(str(e))
         f_db.close()          
         return
+        
+    def retrieve(in_dir, in_dir_id):
+        """ retrieve the algorithm's performance output from .txt files
+        Args:
+            in_dir: A string indicating the path of .txt files
+            in_dir_id: An integer to help us get the algorithm's name
+        Returns:
+            results: A dictionary storing the algorihtm's performance
+        """
+        import glob
+        srccomp = "%s/*.txt" % in_dir
+        srclst = glob.glob(srccomp)  
+        
+        results = {}
+        # process every .txt files
+        for src in srclst:
+            # get the algorithm key 
+            key = src.split('/')[in_dir_id].split('_')[0].strip()
+            # initialize the results dict for algorithm
+            if not(key in results):
+                results[key] = {}
+                results[key]['path'] = []
+            # process the particular .txt file
+            f = open(src, "r")
+            result = {}
+            for line in f:
+                # get the performance name and content
+                content = line.strip().split(' ')
+                if len(content) == 2:
+                    if not(content[0] in result):
+                        result[content[0]] = []
+                    try:
+                        v = [float(content[1]), int(content[1])][content[0]=='sampleSize']
+                        result[content[0]].append(v)
+                    except:
+                        continue
+            results[key]['path'].append(result)
+        return results
+        
               
         
 class RuleSet:
