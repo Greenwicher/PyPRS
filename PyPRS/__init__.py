@@ -505,15 +505,26 @@ class Problem:
         return problem         
         
     def zdt3(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
-        """optimal solution = {x1=[0,1], xi=0}
+        """optimal solution = {x1=[0,1], xi=0}, only some x1=[0,1]
         """        
         lb = np.array([0.0,]*dim)
         ub = np.array([1.0,]*dim)
         objectives = [objective.zdt31,objective.zdt32]    
         if discreteLevel != 0:
-            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
+            _trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
         else:
-            trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
+            _trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0.05,0.95,1000)])
+        objValue = [np.array([f(p) for f in objectives]) for p in _trueParetoSet]
+        trueParetoSet = []
+        _size = len(_trueParetoSet)
+        for i in range(_size):
+            flag = True
+            for j in range(_size):
+                if i!=j and all((objValue[j] - objValue[i]) <= 0.0): 
+                    flag = False
+                    break
+            if flag: trueParetoSet.append(_trueParetoSet[i])
+        trueParetoSet = np.array(trueParetoSet)
         problemArgs = {
                         'description':'ZDT3',
                         'lb':lb,
