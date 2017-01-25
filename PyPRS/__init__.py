@@ -148,6 +148,8 @@ class Core:
         self.tree.addNode(None,problem.lb,problem.ub,problem)
         #initialize iteration information
         self.currentIteration = 1
+        # retrieve all the visited points
+        visitedPoints = self.tree.root.visitedPoints()          
         #partitioning->sampling->evaluation
         while not(self.rule.stop(self,self.rule.stopArgs)):               
             #record start time of this iteration
@@ -185,8 +187,10 @@ class Core:
             #evaluate samples in each leaf         
             for spl in samples:
                 #observe spls multi-objectives
-                points = spl['samples']
+                _points = spl['samples']
                 node = spl['leaf'] 
+                # remove already visited points (even for stochastic case)
+                points = [p for p in _points if not(utils.generateKey(p) in visitedPoints)]
                 #determine replication size for each points to be sampled
                 if problem.stochastic:
                     #stochastic case
