@@ -230,7 +230,6 @@ class Core:
             self.hausdorffDistance.append(performance.calHausdorffDistance(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             #visualize current search progress
             if problem.dim == 2 and self.rule.animationOn:
-                print(self.rule.animationOn)
                 visualize.generateAnimationFrame(outputDir,self.currentIteration-1,self,problem.trueParetoSetInfo)
             #record end time of this iteration
             self.endTime.append(datetime.datetime.now()) 
