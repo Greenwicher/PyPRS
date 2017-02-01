@@ -23,7 +23,7 @@ def samplingIndex(leaf,args):
     sumAlpha = 0.0
     for l in leafNodes:
         sumAlpha += l.samplingIndex
-    alpha = max(np.round(leaf.samplingIndex / sumAlpha * deltaSampleSize),1.0)
+    alpha = int(np.nanmax([leaf.samplingIndex / sumAlpha * deltaSampleSize, 1]))
 #    print(alpha)
     return alpha
     
