@@ -56,6 +56,6 @@ def metropolisIndex(leaf,args):
     if p < acceptProb:
         alpha = unitSampleSize           
     else:
-        alpha = [unitSampleSize, 0.0][leaf.pool!={}]
+        alpha = [unitSampleSize, 1][leaf.pool!={}]
     print('Prob=%.3f, AcceptProb=%.3f, alpha=%d \n' % (p,acceptProb,alpha))         
     return alpha
