@@ -175,7 +175,7 @@ class Core:
             t = time.time()
             leafNodes = self.tree.leafNodes() #update leaf nodes
             #update sampling index
-            samplingIndex = utils.MultiThread(self.rule.si,zip(leafNodes,repeat(self.rule.siArgs)))                      
+            samplingIndex = utils.MultiThread(self.rule.si,zip(leafNodes,repeat(self.rule.siArgs)))                    
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('samplingIndex'),samplingIndex))
             #determine sample size
             sampleSize = utils.MultiThread(self.rule.sampleSize,zip(leafNodes,repeat(self.rule.sampleSizeArgs)))
@@ -263,7 +263,9 @@ class Core:
               stop = rule.stop.exceedMaximumSampleSize,
               sampleMethod=rule.sampleMethod.uniform,
               sampleMethodArgs={},
-              sampleSize=rule.sampleSize.samplingIndex,pi=rule.pi.minimumDominationCount,
+              sampleSize=rule.sampleSize.samplingIndex,
+              si_ucb_c=0.5,
+              pi=rule.pi.minimumDominationCount,
               alphaPI=0,
               partition=rule.partition.bisection,atomPartitionScale=0,
               replicationSize=rule.replicationSize.equal,unitReplicationSize=5,replicationTimes=5,
@@ -281,7 +283,7 @@ class Core:
                 'sampleMethodArgs': sampleMethodArgs,
                 'pi' : pi,
                 'si' : rule.si.ucb,
-                'siArgs': {'ucb_c':0.5},
+                'siArgs': {'ucb_c':si_ucb_c},
                 'stopArgs':{'maximumSampleSize': maximumSampleSize,},
                 'sampleSizeArgs' : {'deltaSampleSize': deltaSampleSize,
                                     'unitSampleSize': unitSampleSize},
