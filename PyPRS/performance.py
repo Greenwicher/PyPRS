@@ -42,9 +42,9 @@ def calTrueParetoProportion(paretoSet, trueParetoSet):
         paretoSetKey = set()
         trueParetoSetKey = set()
         for x in paretoSet:
-            paretoSetKey.add(utils.generateKey(x))
+            paretoSetKey.add(tuple(x))
         for x in trueParetoSet:
-            trueParetoSetKey.add(utils.generateKey(x))
+            trueParetoSetKey.add(tuple(x))   
         trueParetoProportion = len(paretoSetKey & trueParetoSetKey) / len(trueParetoSetKey)
     else:
         trueParetoProportion = np.nan
