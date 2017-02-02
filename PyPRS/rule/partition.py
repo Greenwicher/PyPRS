@@ -128,3 +128,17 @@ def nextDim(leaf, args):
         dim = np.random.randint(0,dimX)
     #print('Select Dim %d with maxDiff %.2f, range %.2f at level %d' % (dim, maxDiff, ub[dim]-lb[dim],leaf.level))
     return dim
+    
+def feasible(leaf):
+    """ find the feasible dimension (the range of domain is large enough) to be partitioned
+    Args:
+        leaf: A class Tree() representing leaf node region
+    Returns:
+        feasibleDim: A list indicating the feasible dimension id 
+    """
+    feasibleDim  =[]
+    atom = (leaf.root.ub - leaf.root.ub) / leaf.problem.discreteLevel
+    for i in range(len(leaf.lb)):
+        if leaf.ub[i] - leaf.lb[i] >= atom[i]:
+            feasibleDim.append(i)
+    return feasibleDim
