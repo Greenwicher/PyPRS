@@ -96,8 +96,9 @@ def nextDim(leaf, args):
     for key in pool:
         _p = np.array([pool[key].mean])
         dominantionCount[key] = _cutils.calDominationCount(_p, _visitedPoints, len(_p))[1][0]
-    # enumerate all the possible next dimension to partition
-    for dimID in range(dimX):
+    # enumerate all the possible feasible next dimension to partition
+    feasibleDim = feasible(leaf)
+    for dimID in feasibleDim:
         # determine the partition unit distance 
         unit = (ub[dimID] - lb[dimID]) / x
         # initialize the promisingIndex for each subregion based on xsection
@@ -122,7 +123,7 @@ def nextDim(leaf, args):
     # select the dimension with largest dimDiff value as next dimension to partition
     maxDiff = np.nanmax(dimDiff)
     if not(np.isnan(maxDiff)):
-        candidate = [i for i in range(dimX) if dimDiff[i] == maxDiff]        
+        candidate = [feasibleDim[i] for i in range(len(feasibleDim)) if dimDiff[i] == maxDiff]        
         dim = candidate[np.random.randint(0,len(candidate))]
     else:
         dim = np.random.randint(0,dimX)
@@ -137,7 +138,10 @@ def feasible(leaf):
         feasibleDim: A list indicating the feasible dimension id 
     """
     feasibleDim  =[]
-    atom = (leaf.root.ub - leaf.root.ub) / leaf.problem.discreteLevel
+    try:
+        atom = (leaf.root.ub - leaf.root.lb) / leaf.problem.discreteLevel
+    except:
+        atom = 0
     for i in range(len(leaf.lb)):
         if leaf.ub[i] - leaf.lb[i] >= atom[i]:
             feasibleDim.append(i)
