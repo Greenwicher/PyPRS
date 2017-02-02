@@ -9,6 +9,7 @@
 
 import numpy as np
 from .. import utils
+from .. import _cutils
 import random
 from numba import jit
 import copy
@@ -70,8 +71,7 @@ def normal(leaf, n, args):
         t += 1
     samples = np.array(samples)
     return {'leaf':leaf, 'samples':samples} 
-
-
+    
 def elite(leaf, n, args):
     """draw n samples based on elite search algorithm
     Args:
@@ -87,15 +87,23 @@ def elite(leaf, n, args):
     problem.lb = tuple(leaf.lb)
     problem.ub = tuple(leaf.ub)
     alg = copy.deepcopy(args['elite']['algGMO'])
+    numPop = args['elite']['numPop']
     
-    # retrieve elite starting point
-    visitedPoints = leaf.pool
-    paretoSet = utils.identifyParetoSet(visitedPoints) 
-      
+    visitedPoints = leaf.root.visitedPoints()
+    pool = leaf.pool
+    _pool = utils.dictToSortedNumpyArray(pool, len(leaf.problem.objectives))  
+    # check whether the leaf.pool is empty
+    if not (len(_pool)):
+        return uniform(leaf, n, args)
+    # construct the elite initial population by sorting the dominationCount
+    dominationCount = _cutils.calDominationCount(_pool, _pool, len(_pool))[1] 
+    _candidate = sorted(zip([pool[k].x for k in pool], dominationCount), key=lambda x: x[1])
+    candidate = [foo[0] for foo in _candidate]
+    for _ in range(numPop - len(candidate)):
+        candidate.append(uniform(leaf,1,args)['samples'][0])
     # construct initial population
-    pop = PyGMO.population(problem, args['elite']['numPop'])
-    for k in paretoSet:
-        x = paretoSet[k].x
+    pop = PyGMO.population(problem, numPop)
+    for x in candidate:
         if leaf.withinNode(x):
             pop.push_back(list(x))
             pop.erase(0)
@@ -103,7 +111,7 @@ def elite(leaf, n, args):
     samplesKey = []
     # generate new elite points
     t, T = 0, 2 * n
-    while(len(samples) < n and t < T and n < np.product((leaf.ub-leaf.lb)/((leaf.problem.ub-leaf.problem.lb)/(leaf.problem.discreteLevel + 1e-100)))):    
+    while(len(samples) < n and t < T and n < np.product((leaf.ub-leaf.lb)/((leaf.problem.ub-leaf.problem.lb)/(leaf.problem.discreteLevel + 1e-100)))):            
         for individual in pop:
             x = discretize(leaf, [individual.cur_x])[0]
             key = utils.generateKey(x)
@@ -114,6 +122,10 @@ def elite(leaf, n, args):
         t += 1
     if not(samples):
         samples = uniform(leaf,n,args)['samples']
+    elif len(samples) < n:
+        rn = n - len(samples)
+        for _ in range(rn):
+            samples.append(uniform(leaf,1,args)['samples'][0])
     else:
         samples = np.array(samples[:n])
-    return {'leaf':leaf, 'samples':samples}      
+    return {'leaf':leaf, 'samples':samples}  
