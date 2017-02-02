@@ -129,3 +129,17 @@ def elite(leaf, n, args):
     else:
         samples = np.array(samples[:n])
     return {'leaf':leaf, 'samples':samples}  
+    
+def feasible(leaf, samples):
+    """ select the feasible samples 
+    Args:
+        leaf: A class Tree() representing the leaf node region
+        samples: An n * dimX array representing the samples     
+    Returns:
+        feasibleSamples: An m * dimX array representing the feasible samples
+    """
+    feasibleSamples = []
+    for s in samples:
+        if utils.withinRegion(s, leaf.lb, leaf.ub): feasibleSamples.append(s)
+    feasibleSamples = np.array(feasibleSamples)
+    return feasibleSamples    
