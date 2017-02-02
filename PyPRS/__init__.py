@@ -169,7 +169,7 @@ class Core:
                 #add new children nodes
                 for sub in MPR['subRegions']:                     
                     _node = Tree()
-                    _node.addNode(parent,sub[0],sub[1],problem)                
+                    _node.addNode(parent,sub[0],sub[1],problem)  
             t1 = time.time() - t 
             ### SAMPLING ###     
             t = time.time()
@@ -189,8 +189,8 @@ class Core:
                 #observe spls multi-objectives
                 _points = spl['samples']
                 node = spl['leaf'] 
-                # remove already visited points (even for stochastic case)
-                points = [p for p in _points if not(utils.generateKey(p) in visitedPoints)]
+                # remove already visited points (even for stochastic case), the feasiblity check is not elegant
+                points = [p for p in _points if not(utils.generateKey(p) in visitedPoints) and utils.withinRegion(p, node.lb, node.ub)]
                 #determine replication size for each points to be sampled
                 if problem.stochastic:
                     #stochastic case
@@ -203,7 +203,8 @@ class Core:
                 for i in range(len(points)):
                     objectives.append(problem.evaluate(points[i], repSize[i]))
                 #update pool for each node                            
-                node.updatePool(points,objectives,problem)                            
+                node.updatePool(points,objectives,problem)  
+                
             #identify current Pareto set and draw more replications for them
 #            if problem.stochastic:
 #                paretoSet = utils.identifyParetoSetParallel(self.tree)                 
@@ -211,7 +212,8 @@ class Core:
 #                repSize = np.array([self.rule.replicationSizeArgs['paretoReplicationSize']]*len(paretoSet))
 #                objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))                
 #                node.updatePool(points,objectives,problem) 
-            paretoSet = utils.identifyParetoSetParallel(self.tree)                      
+            paretoSet = utils.identifyParetoSetParallel(self.tree)
+            visitedPoints = self.tree.root.visitedPoints()
             #update promising index                       
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))                         
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))    
@@ -1330,7 +1332,7 @@ class Tree:
         Args: 
             parent: parent node 
             lb: lower bound of decision variables, lb <= x
-            ub: upper bound of decision variables, x < ub
+            ub: upper bound of decision variables, x <= ub
             problem: A class Problem() 
         Returns:
             None
