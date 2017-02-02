@@ -69,7 +69,7 @@ def normal(leaf, n, args):
         if leaf.withinNode(point):
             samples.append(point)
         t += 1
-    samples = np.array(samples)
+    samples = feasible(leaf, np.array(samples))
     return {'leaf':leaf, 'samples':samples} 
     
 def elite(leaf, n, args):
@@ -128,6 +128,7 @@ def elite(leaf, n, args):
             samples.append(uniform(leaf,1,args)['samples'][0])
     else:
         samples = np.array(samples[:n])
+    samples = feasible(leaf, samples)
     return {'leaf':leaf, 'samples':samples}  
     
 def feasible(leaf, samples):
