@@ -97,7 +97,7 @@ def nextDim(leaf, args):
         _p = np.array([pool[key].mean])
         dominantionCount[key] = _cutils.calDominationCount(_p, _visitedPoints, len(_p))[1][0]
     # enumerate all the possible feasible next dimension to partition
-    feasibleDim = feasible(leaf)
+    feasibleDim = feasible(leaf, x)
     for dimID in feasibleDim:
         # determine the partition unit distance 
         unit = (ub[dimID] - lb[dimID]) / x
@@ -121,7 +121,10 @@ def nextDim(leaf, args):
         diff = np.nanmax(promisingIndex) - np.nanmin(promisingIndex)
         dimDiff.append(diff)        
     # select the dimension with largest dimDiff value as next dimension to partition
-    maxDiff = np.nanmax(dimDiff)
+    if dimDiff:
+        maxDiff = np.nanmax(dimDiff)
+    else:
+        maxDiff = np.nan
     if not(np.isnan(maxDiff)):
         candidate = [feasibleDim[i] for i in range(len(feasibleDim)) if dimDiff[i] == maxDiff]        
         dim = candidate[np.random.randint(0,len(candidate))]
@@ -130,10 +133,11 @@ def nextDim(leaf, args):
     #print('Select Dim %d with maxDiff %.2f, range %.2f at level %d' % (dim, maxDiff, ub[dim]-lb[dim],leaf.level))
     return dim
     
-def feasible(leaf):
+def feasible(leaf, x):
     """ find the feasible dimension (the range of domain is large enough) to be partitioned
     Args:
         leaf: A class Tree() representing leaf node region
+        x: An integer indicating the number of subregions
     Returns:
         feasibleDim: A list indicating the feasible dimension id 
     """
@@ -143,6 +147,6 @@ def feasible(leaf):
     except:
         atom = 0
     for i in range(len(leaf.lb)):
-        if leaf.ub[i] - leaf.lb[i] >= atom[i]:
+        if leaf.ub[i] - leaf.lb[i] >= x * atom[i]:
             feasibleDim.append(i)
     return feasibleDim
