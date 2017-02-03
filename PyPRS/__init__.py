@@ -548,8 +548,8 @@ class Problem:
     def zdt4(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=[0,1], xi=0}
         """        
-        lb = np.array([0.0]+[-5.0]*(dim-1))
-        ub = np.array([1.0]+[5.0]*(dim-1))
+        lb = np.array([0.0]+[-1.0]*(dim-1))
+        ub = np.array([1.0]+[1.0]*(dim-1))
         objectives = [objective.zdt41,objective.zdt42]   
         if discreteLevel != 0:
             trueParetoSet = np.array([[x1]+[0]*(dim-1) for x1 in np.linspace(0,1,discreteLevel+1)])
