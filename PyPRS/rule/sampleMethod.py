@@ -13,6 +13,7 @@ from .. import _cutils
 import random
 from numba import jit
 import copy
+from . import sampleSize
 
 def uniform(leaf, n, args):
     """draw n uniform distributed samples from this leaf
@@ -24,7 +25,18 @@ def uniform(leaf, n, args):
         leaf: This leaf
         samples: An n * dimX array representing the uniformlly samples     
     """
-    samples = discretize(leaf, np.random.uniform(leaf.lb,leaf.ub,(n,len(leaf.lb))))
+    visitedPoints = leaf.root.visitedPoints()
+    samplesKey = []
+    samples = []
+    t, T = 0, 100*n
+    while (len(samples) < n and t < T):
+        x = discretize(leaf, np.random.uniform(leaf.lb,leaf.ub,(1,len(leaf.lb))))[0]
+        key = utils.generateKey(x)
+        if not(key in visitedPoints or key in samplesKey):
+            samples.append(x)
+            samplesKey.append(key)
+        t += 1
+    samples = np.array(samples)
     return {'leaf':leaf,'samples':samples}
     
 
@@ -81,13 +93,18 @@ def elite(leaf, n, args):
     Returns:
         leaf: This leaf
         samples: An n * dimX array representing the uniformlly samples     
-    """    
+    """  
+ 
     import PyGMO
     problem = copy.deepcopy(args['elite']['problemGMO'])
     problem.lb = tuple(leaf.lb)
     problem.ub = tuple(leaf.ub)
     alg = copy.deepcopy(args['elite']['algGMO'])
     numPop = args['elite']['numPop']
+    
+    if sampleSize.capacity(leaf) <= numPop:
+        samples = uniform(leaf, numPop, args)['samples']
+        return {'leaf':leaf, 'samples':samples}    
     
     visitedPoints = leaf.root.visitedPoints()
     pool = leaf.pool
@@ -99,8 +116,8 @@ def elite(leaf, n, args):
     dominationCount = _cutils.calDominationCount(_pool, _pool, len(_pool))[1] 
     _candidate = sorted(zip([pool[k].x for k in pool], dominationCount), key=lambda x: x[1])
     candidate = [foo[0] for foo in _candidate]
-    for _ in range(numPop - len(candidate)):
-        candidate.append(uniform(leaf,1,args)['samples'][0])
+    for p in discretize(leaf, np.random.uniform(leaf.lb,leaf.ub,(max(0, numPop - len(candidate)),len(leaf.lb)))):
+        candidate.append(p)
     # construct initial population
     pop = PyGMO.population(problem, numPop)
     for x in candidate:
@@ -110,8 +127,8 @@ def elite(leaf, n, args):
     samples = []
     samplesKey = []
     # generate new elite points
-    t, T = 0, 2 * n
-    while(len(samples) < n and t < T and n < np.product((leaf.ub-leaf.lb)/((leaf.problem.ub-leaf.problem.lb)/(leaf.problem.discreteLevel + 1e-100)))):            
+    t, T = 0, 100 * n
+    while(len(samples) < n and t < T):
         for individual in pop:
             x = discretize(leaf, [individual.cur_x])[0]
             key = utils.generateKey(x)
@@ -125,7 +142,10 @@ def elite(leaf, n, args):
     elif len(samples) < n:
         rn = n - len(samples)
         for _ in range(rn):
-            samples.append(uniform(leaf,1,args)['samples'][0])
+            try:
+                samples.append(uniform(leaf,1,args)['samples'][0])
+            except:
+                continue
     else:
         samples = np.array(samples[:n])
     samples = feasible(leaf, samples)
