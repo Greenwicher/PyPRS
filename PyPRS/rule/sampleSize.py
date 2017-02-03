@@ -43,7 +43,7 @@ def metropolisIndex(leaf,args):
     """ determine sampling size for the leaf node region based on sampling
         index
     Args:
-        leaf: A class Tree() representing the leaf node region
+        leaf: A cliass Tree() representing the leaf node region
         args: A dictionary of arguments for the function
     Returns:
         alpha: sampling size for the leaf node 
@@ -61,3 +61,19 @@ def metropolisIndex(leaf,args):
         alpha = [unitSampleSize, 1][leaf.pool!={}]
     #print('Prob=%.3f, AcceptProb=%.3f, samplingIndex=%.3f, alpha=%d \n' % (p,acceptProb,leaf.samplingIndex,alpha))         
     return alpha
+        
+def capacity(leaf):
+    """ calculate the number of feasible solutions in the leaf node region
+    Args:
+        leaf: A class Tree() representing the leaf node region
+    Returns:
+        size: An integer indicating the capacity of the leaf
+    """
+    LB, UB, discreteLevel = leaf.root.lb, leaf.root.ub, leaf.problem.discreteLevel
+    if discreteLevel:
+        unit = (UB - LB) / discreteLevel
+        size = np.product(np.floor((leaf.ub-LB)/unit) - np.ceil((leaf.lb-LB)/unit) + 1)
+    else:
+        size = np.inf
+    return size
+    
