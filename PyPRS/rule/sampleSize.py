@@ -7,25 +7,6 @@
     GPL license.
 """
 import numpy as np
-
-def samplingIndex(leaf,args):
-    """ determine sampling size for the leaf node region based on sampling
-        index
-    Args:
-        leaf: A class Tree() representing the leaf node region
-        args: A dictionary of arguments for the function
-    Returns:
-        alpha: sampling size for the leaf node 
-    """
-    leafNodes = leaf.root.leafNodes()
-    deltaSampleSize = args['deltaSampleSize']
-#    deltaSampleSize = args['unitSampleSize'] * len(leafNodes)    
-    sumAlpha = 0.0
-    for l in leafNodes:
-        sumAlpha += l.samplingIndex
-    alpha = int(np.nanmax([leaf.samplingIndex / sumAlpha * deltaSampleSize, 1]))
-#    print(alpha)
-    return alpha
     
 def equalSize(leaf,args):
     """ determine sampling size for the leaf node region based on equal 
@@ -61,7 +42,33 @@ def metropolisIndex(leaf,args):
         alpha = [unitSampleSize, 1][leaf.pool!={}]
     #print('Prob=%.3f, AcceptProb=%.3f, samplingIndex=%.3f, alpha=%d \n' % (p,acceptProb,leaf.samplingIndex,alpha))         
     return alpha
-        
+    
+def samplingIndex(leaf,args):
+    """ determine sampling size for the leaf node region based on sampling
+        index
+    Args:
+        leaf: A class Tree() representing the leaf node region
+        args: A dictionary of arguments for the function
+    Returns:
+        alpha: sampling size for the leaf node 
+    """
+    leafNodes = leaf.root.leafNodes()
+    deltaSampleSize = args['deltaSampleSize']    
+    sumAlpha = 0.0
+    validNodes = []
+    for l in leafNodes:
+        size = capacity(l)
+        if len(l.pool) < size:
+            validNodes.append(l)
+            sumAlpha += l.samplingIndex
+    if leaf in validNodes:
+        alpha = int(np.nanmax([leaf.samplingIndex / sumAlpha * deltaSampleSize, 1]))
+    else:
+        alpha = 0
+    size = capacity(leaf)   
+    #print('..Explored = %d, Capacity = %d, Ratio = %.4f, Sample = %d' % (len(leaf.pool), size, len(leaf.pool)/size, alpha))
+    return alpha
+    
 def capacity(leaf):
     """ calculate the number of feasible solutions in the leaf node region
     Args:
