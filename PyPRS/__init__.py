@@ -1218,9 +1218,14 @@ class Race:
                     if not(content[0] in result):
                         result[content[0]] = []
                     try:
-                        v = [float(content[1]), int(content[1])][content[0]=='sampleSize']
+                        if content[0] == 'sampleSize':
+                            v = int(content[1])
+                        else:
+                            v = float(content[1])
+                        #v = [float(content[1]), int(content[1])][content[0]=='sampleSize']
                         result[content[0]].append(v)
-                    except:
+                    except Exception as e:
+                        print(e, content[0], content[1])
                         continue
             results[key]['path'].append(result)
         return results
