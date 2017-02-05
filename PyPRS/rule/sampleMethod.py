@@ -103,7 +103,7 @@ def elite(leaf, n, args):
     numPop = args['elite']['numPop']
     
     if sampleSize.capacity(leaf) <= numPop:
-        samples = uniform(leaf, numPop, args)['samples']
+        samples = uniform(leaf, 2 * numPop, args)['samples']
         return {'leaf':leaf, 'samples':samples}    
     
     visitedPoints = leaf.root.visitedPoints()
