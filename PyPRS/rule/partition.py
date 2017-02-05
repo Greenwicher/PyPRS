@@ -113,7 +113,7 @@ def nextDim(leaf, args):
             poolDominantionCount = [np.nan] # in case no points in this subregion
             for key in pool:
                 p = pool[key]                
-                if all(_lb <= p.x) and all(p.x < ub):
+                if all(_lb <= p.x) and all(p.x < _ub):
                     poolDominantionCount.append(dominantionCount[key])
             # calculate the promising index in this subregion            
             promisingIndex.append(np.nanmin(poolDominantionCount))
