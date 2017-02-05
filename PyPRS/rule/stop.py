@@ -79,7 +79,7 @@ def exceedPIThreshold(context,args):
     flag = context.currentPI <= args['thresholdPI']
     return flag or optimality(context, args)
     
-def optimality(context, args = {'optimalityOn': True}):
+def optimality(context, args):
     """Exit the PRS algorithm if all the Pareto solutions are found
     Args:
         context: A class Context() recording the information of this case
@@ -94,5 +94,8 @@ def optimality(context, args = {'optimalityOn': True}):
             flag = True
     else:
         flag = False
-    if not(args['optimalityOn']): flag = False
+    try:
+        if not(args['optimalityOn']): flag = False
+    except:
+        pass
     return flag
