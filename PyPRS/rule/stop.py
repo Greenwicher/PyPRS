@@ -21,7 +21,7 @@ def exceedMaximumIteration(context,args):
     """
     
     flag = context.currentIteration > args['maximumIteration']
-    return flag
+    return flag or optimality(context, args)
         
 def exceedMaximumSampleSize(context,args):
     """Exit the PRS algorithm if exceeding maximum sample size
@@ -79,7 +79,7 @@ def exceedPIThreshold(context,args):
     flag = context.currentPI <= args['thresholdPI']
     return flag
     
-def optimality(context, args):
+def optimality(context, args = {'optimalityOn': True}):
     """Exit the PRS algorithm if all the Pareto solutions are found
     Args:
         context: A class Context() recording the information of this case
@@ -94,4 +94,5 @@ def optimality(context, args):
             flag = True
     else:
         flag = False
+    if not(args['optimalityOn']): flag = False
     return flag
