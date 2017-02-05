@@ -129,13 +129,9 @@ def calSubEnsembleMean(results, x, y, minLength = 0):
         # fill the path for each replication
         for r in results:
             try:
-                path = fill(r[x], r[y])
+                path = fill(r[x], r[y], minLength)
                 minmax = min(len(path), minmax)                
-                # only keep the sample path if its length >= minLength
-                if len(path) >= minLength:
-                    samplePath.append(path)
-                else:
-                    continue
+                samplePath.append(path)
             except Exception as e:
                 ensembleMean = None
                 print('Error: calSubEnsembleMean,', e)
@@ -151,7 +147,7 @@ def calSubEnsembleMean(results, x, y, minLength = 0):
             ensembleMean = np.ones(minLength) * np.nan
     elif isinstance(results, dict):
         try:
-            ensembleMean = fill(results[x], results[y])
+            ensembleMean = fill(results[x], results[y], minLength)
         except:
             ensembleMean = None
             print('Error: calSubEnsembleMean')
