@@ -1129,6 +1129,7 @@ class Race:
             sampleSize.append(pop.problem.fevals)    
             t += 1
             print('%s - Iteration %d \t HV = %.4f \t GO = %.4f \t HD = %.4f \t sampleSize = %d' % (key, len(HV), HV[-1], GO[-1], HD[-1], sampleSize[-1]))
+            if GO[-1] == 1: break
         results = {'sampleSize':sampleSize, 
                    'HV':HV,
                    'GO':GO,
