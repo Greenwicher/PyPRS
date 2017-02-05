@@ -111,6 +111,32 @@ def MultiThread(fun,input):
 #                MPR.append(leaf)
 #    return MPR
 
+def identifyMPRMetropolis(tree,alpha=0):
+    """ identify the most promising region by leaf node's promising index
+    Args:
+        tree: A class Tree() representing the whole search Tree (i.e. root node)
+        alpha: An double representing the percentile of PI threshold
+    Returns:
+        MPR: A list of class Tree representing the Most Promising Region (MPR)
+    """
+    MPR = []
+    PI = np.array([])
+    for leaf in tree.leafNodes():
+        PI = np.append(PI,leaf.promisingIndex)
+    thrPI = np.percentile(PI[~np.isnan(PI)],alpha)
+    for leaf in tree.leafNodes():
+        T = 100 / (leaf.level ** 2 + 1e-1)
+        metropolis = np.exp(-(leaf.promisingIndex - thrPI)/T)
+        #print('Leaf Level = %d, Metropolis = %.4f, PI=%.0f' % (leaf.level, metropolis, leaf.promisingIndex)) #debug
+        #check whether it's root node
+        if not(leaf.parent):
+            MPR.append(leaf)
+            break
+        #elif leaf.promisingIndex <= thrPI:
+        elif np.random.uniform(0,1) < metropolis:
+            MPR.append(leaf)
+    return MPR
+
 def identifyMPR(tree,alpha=0):
     """ identify the most promising region by leaf node's promising index
     Args:
@@ -123,7 +149,7 @@ def identifyMPR(tree,alpha=0):
     PI = np.array([])
     for leaf in tree.leafNodes():
         PI = np.append(PI,leaf.promisingIndex)
-    thrPI = np.percentile(PI,alpha)
+    thrPI = np.percentile(PI[~np.isnan(PI)],alpha)
     for leaf in tree.leafNodes():
         #check whether it's root node
         if not(leaf.parent):
@@ -132,6 +158,7 @@ def identifyMPR(tree,alpha=0):
         elif leaf.promisingIndex <= thrPI:
             MPR.append(leaf)
     return MPR
+
 
 def updateObjAttr(obj,attr,value):
     """assign value to ojb's attribute attr
