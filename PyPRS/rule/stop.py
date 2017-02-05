@@ -31,7 +31,7 @@ def exceedMaximumSampleSize(context,args):
         flag: A boolean value indicating whether the algorithim should stop        
     """    
     flag = context.currentSampleSize >= args['maximumSampleSize']
-    return flag
+    return flag or optimality(context, args)
     
 def exceedMaximumComputationTime(context,args):
     """Exit the PRS algorithm if exceeding maximum computation time
@@ -43,7 +43,7 @@ def exceedMaximumComputationTime(context,args):
     now = datetime.datetime.now()
     currentComputationTime = (now - context.startTime[0]).total_seconds()
     flag = currentComputationTime >= args['maximumComputationTime']
-    return flag
+    return flag or optimality(context, args)
 
 ###PRECISION PERSPECTIVE####
 
@@ -55,7 +55,7 @@ def exceedMaximumTreeLevel(context,args):
         flag: A boolean value indicating whether the algorithim should stop        
     """
     flag = context.currentTreeLevel >= args['maximumTreeLevel']
-    return flag
+    return flag or optimality(context, args)
     
 def exceedMPRMaximumTreeLevel(context,args):
     """Exit the PRS algorithm if minimum tree levels of MPR exceeds maximum tree level
@@ -67,7 +67,7 @@ def exceedMPRMaximumTreeLevel(context,args):
     MPR = utils.identifyMPR(context.tree,context.rule.alphaPI)        
     minimumMPRTreeLevel = min([leaf.level for leaf in MPR])
     flag = minimumMPRTreeLevel >= args['maximumTreeLevel'] 
-    return flag    
+    return flag or optimality(context, args)    
     
 def exceedPIThreshold(context,args):
     """Exit the PRS algorithm if satisfying the threshold of promising index
@@ -77,7 +77,7 @@ def exceedPIThreshold(context,args):
         flag: A boolean value indicating whether the algorithim should stop        
     """
     flag = context.currentPI <= args['thresholdPI']
-    return flag
+    return flag or optimality(context, args)
     
 def optimality(context, args = {'optimalityOn': True}):
     """Exit the PRS algorithm if all the Pareto solutions are found
