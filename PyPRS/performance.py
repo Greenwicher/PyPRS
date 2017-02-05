@@ -76,11 +76,12 @@ def calHausdorffDistance(paretoSet, trueParetoSet):
         HausdorffDistance = np.nan
     return HausdorffDistance
     
-def fill(x, y):
+def fill(x, y, minLength):
     """ fill the empty (x, y) point given the discrete set of (x, y)
     Args:
         x: A list of discrete point in the xth coordinate
         y: A list of discrete point in the yth coordinate associated with x
+        minLength: An integer representing the required minimum length of path        
     Returns:
         y: A list of "continuous" point in the yth coordinate associated with x
     """
@@ -89,7 +90,7 @@ def fill(x, y):
     _y = []
     for i in range(len(y)-1):
          _y += [y[i]] * (x[i+1] - x[i])
-    _y += [y[-1]] 
+    _y += [y[-1]] * max(minLength - x[-1] + 1, 1)
     return _y
     
 def calEnsembleMean(results, minLength = 0):
