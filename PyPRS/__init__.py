@@ -149,28 +149,11 @@ class Core:
         #initialize iteration information
         self.currentIteration = 1
         # retrieve all the visited points
-        visitedPoints = self.tree.root.visitedPoints()          
-        #partitioning->sampling->evaluation
+        visitedPoints = {}        
+        #sampling->evaluation_>partitioning
         while not(self.rule.stop(self,self.rule.stopArgs)):               
             #record start time of this iteration
             self.startTime.append(datetime.datetime.now())            
-            ### PARTIONING ####
-            t = time.time()
-            #determine MPR
-            self.MPR = utils.identifyMPR(self.tree,self.rule.alphaPI)
-            #exclude too small MPR
-            largeMPR = [leafMPR for leafMPR in self.MPR if max(leafMPR.ub-leafMPR.lb) > self.rule.atomPartitionScale]          
-            #partition MPR into subregions
-            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR, repeat(self.rule.partitionArgs)))          
-            #add new node into the Tree
-            for MPR in subregions:
-                parent = MPR['parent']
-                parent.thr = MPR['thr'] #update partition threshold of parent
-                #add new children nodes
-                for sub in MPR['subRegions']:                     
-                    _node = Tree()
-                    _node.addNode(parent,sub[0],sub[1],problem)  
-            t1 = time.time() - t 
             ### SAMPLING ###     
             t = time.time()
             leafNodes = self.tree.leafNodes() #update leaf nodes
@@ -181,7 +164,7 @@ class Core:
             sampleSize = utils.MultiThread(self.rule.sampleSize,zip(leafNodes,repeat(self.rule.sampleSizeArgs)))
             #draw samples from each leaf nodes
             samples = utils.MultiThread(self.rule.sampleMethod,zip(leafNodes,sampleSize,repeat(self.rule.sampleMethodArgs)))
-            t2 = time.time() - t 
+            t1 = time.time() - t 
             ### EVALUATION ###  
             t = time.time()                      
             #evaluate samples in each leaf         
@@ -217,7 +200,26 @@ class Core:
             #update promising index                       
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))                         
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))    
+            t2 = time.time() - t 
+
+            ### PARTIONING ####
+            t = time.time()
+            #determine MPR
+            self.MPR = utils.identifyMPR(self.tree,self.rule.alphaPI)
+            #exclude too small MPR
+            largeMPR = [leafMPR for leafMPR in self.MPR if max(leafMPR.ub-leafMPR.lb) > self.rule.atomPartitionScale]          
+            #partition MPR into subregions
+            subregions = utils.MultiThread(self.rule.partition,zip(largeMPR, repeat(self.rule.partitionArgs)))          
+            #add new node into the Tree
+            for MPR in subregions:
+                parent = MPR['parent']
+                parent.thr = MPR['thr'] #update partition threshold of parent
+                #add new children nodes
+                for sub in MPR['subRegions']:                     
+                    _node = Tree()
+                    _node.addNode(parent,sub[0],sub[1],problem)  
             t3 = time.time() - t 
+            
             ### OTHERS - Iteration Update ###    
             t = time.time()
             self.currentIteration += 1
