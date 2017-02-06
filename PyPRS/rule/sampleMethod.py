@@ -25,7 +25,7 @@ def uniform(leaf, n, args):
         leaf: This leaf
         samples: An n * dimX array representing the uniformlly samples     
     """
-    visitedPoints = leaf.root.visitedPoints()
+    visitedPoints = leaf.pool
     samplesKey = []
     samples = []
     t, T = 0, 100*n
