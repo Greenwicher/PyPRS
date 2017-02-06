@@ -31,5 +31,19 @@ def ucb(leaf,args):
         #calculate the ucb-like index
         if np.isnan(leaf.parent.n):
             leaf.parent.n = sum([l.n for l in leaf.parent.children])
-        value = max((M-leaf.promisingIndex), 1e-100) + args['ucb_c']*np.sqrt(2*np.log(max(leaf.parent.n,1))/np.nanmax([leaf.n,1]))
+        value = max((M-leaf.promisingIndex), 1e-100) / max(M, 1e-100) + args['ucb_c']*np.sqrt(2*np.log(max(leaf.parent.n,1))/np.nanmax([leaf.n,1]))
     return value
+    
+    
+def equal(leaf, args):
+    """ set the sampling index of each leaf node equal
+    Args:
+        leaf: A class Tree() representing the leaf node region
+        args: A dictionary of arguments for the function    
+    Returns:
+        value: A double representing the sampling index
+    """    
+    return 1
+    
+
+    
