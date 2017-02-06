@@ -165,6 +165,7 @@ class Core:
             #draw samples from each leaf nodes
             samples = utils.MultiThread(self.rule.sampleMethod,zip(leafNodes,sampleSize,repeat(self.rule.sampleMethodArgs)))
             t1 = time.time() - t 
+            
             ### EVALUATION ###  
             t = time.time()                      
             #evaluate samples in each leaf         
@@ -173,7 +174,7 @@ class Core:
                 _points = spl['samples']
                 node = spl['leaf'] 
                 # remove already visited points (even for stochastic case), the feasiblity check is not elegant
-                points = [p for p in _points if not(utils.generateKey(p) in visitedPoints) and utils.withinRegion(p, node.lb, node.ub)]
+                points = [p for p in _points if not(utils.generateKey(p) in node.pool) and utils.withinRegion(p, node.lb, node.ub)]
                 #determine replication size for each points to be sampled
                 if problem.stochastic:
                     #stochastic case
@@ -187,6 +188,7 @@ class Core:
                     objectives.append(problem.evaluate(points[i], repSize[i]))
                 #update pool for each node                            
                 node.updatePool(points,objectives,problem)  
+                #print('Observed/Capacity: %d/%d \t\t SI = %.4f, PI = %.4f, Sampled=%d' % (len(node.pool), rule.sampleSize.capacity(node), node.samplingIndex, node.promisingIndex, len(points))) #debug                
                 
             #identify current Pareto set and draw more replications for them
 #            if problem.stochastic:
@@ -201,7 +203,7 @@ class Core:
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))                         
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))    
             t2 = time.time() - t 
-
+            
             ### PARTIONING ####
             t = time.time()
             #determine MPR
@@ -263,11 +265,13 @@ class Core:
         print('Total elapsed time: %.2fs' % (self.computationTime[-1]))
         return results   
         
-    def moprs(maximumSampleSize=1000,deltaSampleSize=30,unitSampleSize=5,
+    def moprs(deltaSampleSize=30,unitSampleSize=5,
               stop = rule.stop.exceedMaximumSampleSize,
+              stopArgs={},
               sampleMethod=rule.sampleMethod.uniform,
               sampleMethodArgs={},
               sampleSize=rule.sampleSize.samplingIndex,
+              si = rule.si.equal,
               si_ucb_c=0.5,
               pi=rule.pi.minimumDominationCount,
               alphaPI=0,
@@ -286,9 +290,9 @@ class Core:
                 'sampleMethod' : sampleMethod,
                 'sampleMethodArgs': sampleMethodArgs,
                 'pi' : pi,
-                'si' : rule.si.ucb,
+                'si' : si,
                 'siArgs': {'ucb_c':si_ucb_c},
-                'stopArgs':{'maximumSampleSize': maximumSampleSize,},
+                'stopArgs':stopArgs,
                 'sampleSizeArgs' : {'deltaSampleSize': deltaSampleSize,
                                     'unitSampleSize': unitSampleSize},
                 'replicationSizeArgs' : {'unitReplicationSize':unitReplicationSize,
@@ -1361,7 +1365,8 @@ class Tree:
                 if utils.withinRegion(point.x,lb,ub):
                     pool = dict({key:point},**pool)
             self.pool = pool
-            self.n = sum([len(pool[key].history) for key in pool])            
+            self.n = sum([len(pool[key].history) for key in pool])  
+            self.promisingIndex = self.parent.promisingIndex
         else:
             #Update self as root 
             self.root = self
@@ -1467,7 +1472,7 @@ class Tree:
             dominationCount = _cutils.calDominationCount(_pool,_visitedPoints,len(_pool))[1]        
 #            #call python function
 #            dominationCount = utils.calDominationCount(_pool,_visitedPoints)
-        else:
+        else:                
             dominationCount = np.array([np.nan])
         
         return dominationCount
