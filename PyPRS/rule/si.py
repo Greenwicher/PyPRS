@@ -31,5 +31,5 @@ def ucb(leaf,args):
         #calculate the ucb-like index
         if np.isnan(leaf.parent.n):
             leaf.parent.n = sum([l.n for l in leaf.parent.children])
-        value = (M-leaf.promisingIndex)+ args['ucb_c']*np.sqrt(2*np.log(max(leaf.parent.n,0))/np.nanmax([leaf.n,1]))
+        value = (M-leaf.promisingIndex)+ args['ucb_c']*np.sqrt(2*np.log(max(leaf.parent.n,1))/np.nanmax([leaf.n,1]))
     return value
