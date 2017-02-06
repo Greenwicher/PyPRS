@@ -119,7 +119,7 @@ def nextDim(leaf, args):
             promisingIndex.append(np.nanmin(poolDominantionCount))
         # calculate the dimDiff for the dimension dimID            
         diff = np.nanmax(promisingIndex) - np.nanmin(promisingIndex)
-        dimDiff.append(diff)        
+        dimDiff.append(diff)
     # select the dimension with largest dimDiff value as next dimension to partition
     if dimDiff:
         maxDiff = np.nanmax(dimDiff)
@@ -152,3 +152,18 @@ def feasible(leaf, x):
         if leaf.ub[i] - leaf.lb[i] >= x * atom[i]:
             feasibleDim.append(i)
     return feasibleDim
+    
+def calEntropy(vList):
+    """ calculate the entropy value given the list
+    Args:
+        vList: An list of some values
+    Returns:
+        entropy: An double representing the entropy of vList
+    """
+    from collections import Counter
+    counter = Counter(vList)
+    entropy, N = 0, len(vList)
+    for v in counter:
+        p = counter[v] / N
+        entropy += - p * np.log(p)
+    return entropy
