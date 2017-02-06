@@ -62,9 +62,9 @@ def samplingIndex(leaf,args):
             validNodes.append(l)
             sumAlpha += l.samplingIndex
     if leaf in validNodes:
-        alpha = int(np.nanmax([leaf.samplingIndex / sumAlpha * deltaSampleSize, 1]))
+        alpha = int(np.ceil(np.nanmax([leaf.samplingIndex / sumAlpha * deltaSampleSize, 1])))
     else:
-        alpha = 1
+        alpha = 0
     size = capacity(leaf)   
     #print('..Explored = %d, Capacity = %d, Ratio = %.4f, Sample = %d' % (len(leaf.pool), size, len(leaf.pool)/size, alpha))
     return alpha
