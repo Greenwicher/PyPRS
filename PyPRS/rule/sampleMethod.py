@@ -102,8 +102,10 @@ def elite(leaf, n, args):
     alg = copy.deepcopy(args['elite']['algGMO'])
     numPop = args['elite']['numPop']
     
-    if sampleSize.capacity(leaf) <= numPop:
-        samples = uniform(leaf, 2 * numPop, args)['samples']
+    capacity = sampleSize.capacity(leaf)
+    if capacity <= numPop and len(leaf.pool) != capacity:
+        #samples = uniform(leaf, 2 * numPop, args)['samples']
+        samples = feasible(leaf, entireSolution(leaf))
         return {'leaf':leaf, 'samples':samples}    
     
     visitedPoints = leaf.root.visitedPoints()
@@ -163,4 +165,25 @@ def feasible(leaf, samples):
     for s in samples:
         if utils.withinRegion(s, leaf.lb, leaf.ub): feasibleSamples.append(s)
     feasibleSamples = np.array(feasibleSamples)
-    return feasibleSamples    
+    return feasibleSamples  
+    
+def entireSolution(leaf):
+    """ return the entire solution space of this leaf node region
+    Args:
+        leaf: A class Tree() representing the leaf node region 
+    Returns:
+        domain: A list of numpy array storing the entire solution space
+    """
+    LB, UB, discreteLevel = leaf.root.lb, leaf.root.ub, leaf.problem.discreteLevel
+    if discreteLevel:
+        unit = (UB - LB) / discreteLevel
+        k1 = np.ceil((leaf.lb-LB)/unit).astype(int)
+        k2 = np.floor((leaf.ub-LB)/unit).astype(int)
+        slice = [[LB[i] + k * unit[i] for k in range(k1[i], k2[i]+1)] for i in range(len(k1))]
+        import itertools
+        domain = np.array([list(foo) for foo in itertools.product(*slice)])
+        if any([not(leaf.withinNode(p)) for p in domain]): print('=\n'*20)
+    else:
+        print('fail to get the entire solution space due to the zero discrete level')
+        exit()  
+    return domain
