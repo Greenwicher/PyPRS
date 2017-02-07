@@ -167,7 +167,9 @@ class Core:
             t1 = time.time() - t 
             
             ### EVALUATION ###  
-            t = time.time()                      
+            t = time.time() 
+            #jj = 0 #debug       
+            #visitedPoints = self.tree.root.visitedPoints() #debug
             #evaluate samples in each leaf         
             for spl in samples:
                 #observe spls multi-objectives
@@ -188,7 +190,19 @@ class Core:
                     objectives.append(problem.evaluate(points[i], repSize[i]))
                 #update pool for each node                            
                 node.updatePool(points,objectives,problem)  
-                #print('Observed/Capacity: %d/%d \t\t SI = %.4f, PI = %.4f, Sampled=%d' % (len(node.pool), rule.sampleSize.capacity(node), node.samplingIndex, node.promisingIndex, len(points))) #debug                
+                
+#                # debug
+#                flag1, flag2 = False, True
+#                for i in range(problem.discreteLevel+1):
+#                    p = np.array([i/(problem.discreteLevel)] + [0] * (problem.dim-1))
+#                    if node.withinNode(p): 
+#                        flag1 = True
+#                        if not(utils.generateKey(p) in visitedPoints):
+#                            flag2 = False
+#                            break
+#                if flag1: print('Observed/Capacity: %d/%d \t\t SI = %.4f, PI = %.4f, Sampled=%d/%d/%d, True MPR: %s/%s' % (len(node.pool), rule.sampleSize.capacity(node), node.samplingIndex, node.promisingIndex, len(points), len(_points), sampleSize[jj], str(flag1), str(flag2))) #debug                
+#                jj += 1
+#                #debug
                 
             #identify current Pareto set and draw more replications for them
 #            if problem.stochastic:
