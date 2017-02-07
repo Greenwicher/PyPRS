@@ -45,22 +45,3 @@ class sch(base):
     def human_readable_extra(self):
         return "\n\tTest Problem SCH"
         
-class zdt4(base):
-    """ test problem ZDT4
-    """
-    def __init__(self, dim = 2):
-        super(zdt4, self).__init__(dim, 0, 2)
-        self.set_bounds(0.0, 1.0)
-        
-    def _objfun_impl(self, x):
-        try:
-            x = np.array(x)
-            zdt4g = 1 + 10*(len(x)-1) + sum(x[1:]**2 - 10*np.cos(4*np.pi*x[1:]))
-            f0 = x[0]
-            f1 = zdt4g * (1-np.sqrt(x[0]/zdt4g))
-        except Exception as e:
-            print(e)
-        return (f0, f1, )
-        
-    def human_readable_extra(self):
-        return "\n\tTest Problem ZDT4"        
