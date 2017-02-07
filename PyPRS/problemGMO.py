@@ -50,7 +50,7 @@ class zdt4(base):
     """
     def __init__(self, dim = 2):
         super(zdt4, self).__init__(dim, 0, 2)
-        self.set_bounds(-1.0, 1.0)
+        self.set_bounds(0.0, 1.0)
         
     def _objfun_impl(self, x):
         try:
