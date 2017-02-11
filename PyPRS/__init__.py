@@ -1121,8 +1121,14 @@ class Race:
         HV, GO, HD, sampleSize, paretoSet, front = [[] for _ in range(6)]
         LB, UB, discreteLevel = self.problemPRS.lb, self.problemPRS.ub, self.problemPRS.discreteLevel
         trueParetoSet = utils.paretoSetToList(self.problemPRS.trueParetoSet)
+        # get the number of trials to average around 
+        import re
+        try:
+            numTrials = int(re.findall("trials: (\d+)", str(self.problemGMO.human_readable_extra))[0])
+        except:
+            numTrials = 1
         t = 0
-        while(max(pop.problem.fevals, t) < self.maximumSampleSize):
+        while(max(pop.problem.fevals * numTrials, t) < self.maximumSampleSize):
             pop = alg.evolve(pop)
             # update paretoSet
             popList = [utils.discretize([np.array(individual.cur_x)], 
@@ -1144,7 +1150,7 @@ class Race:
             HV.append(performance.calHyperVolume(front,self.problemPRS.referencePoint))
             GO.append(performance.calTrueParetoProportion(paretoSet, trueParetoSet))
             HD.append(performance.calHausdorffDistance(paretoSet, trueParetoSet))        
-            sampleSize.append(pop.problem.fevals)    
+            sampleSize.append(pop.problem.fevals * numTrials)    
             t += 1
             print('%s - Iteration %d \t HV = %.4f \t GO = %.4f \t HD = %.4f \t sampleSize = %d' % (key, len(HV), HV[-1], GO[-1], HD[-1], sampleSize[-1]))
             if GO[-1] == 1: break
