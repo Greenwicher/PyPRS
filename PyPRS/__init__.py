@@ -180,7 +180,7 @@ class Core:
                 #determine replication size for each points to be sampled
                 if problem.stochastic:
                     #stochastic case
-                    repSize = self.rule.replicationSize(node,points,self.MPR,self.rule.replicationSizeArgs)
+                    repSize = self.rule.replicationSize(node,points,self.MPR,self.rule.replicationSizeArgs)             
                 else:
                     #deterministic case
                     repSize = np.array([1]*len(points))                            
@@ -204,15 +204,15 @@ class Core:
 #                jj += 1
 #                #debug
                 
-            #identify current Pareto set and draw more replications for them
-#            if problem.stochastic:
-#                paretoSet = utils.identifyParetoSetParallel(self.tree)                 
+            paretoSet = utils.identifyParetoSetParallel(self.tree)
+            visitedPoints = self.tree.root.visitedPoints()            
+#            # identify current Pareto set and draw more replications for them
+#            if problem.stochastic:               
 #                points = [paretoSet[k].x for k in paretoSet]
 #                repSize = np.array([self.rule.replicationSizeArgs['paretoReplicationSize']]*len(paretoSet))
-#                objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))                
-#                node.updatePool(points,objectives,problem) 
-            paretoSet = utils.identifyParetoSetParallel(self.tree)
-            visitedPoints = self.tree.root.visitedPoints()
+#                objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))   
+#                for node in leafNodes:
+#                    node.updatePool(points,objectives,problem)             
             #update promising index                       
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))                         
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))    
@@ -311,7 +311,7 @@ class Core:
                                     'unitSampleSize': unitSampleSize},
                 'replicationSizeArgs' : {'unitReplicationSize':unitReplicationSize,
                                          'replicationTimes':replicationTimes,
-                                         'paretoReplicationSize':10,
+                                         'paretoReplicationSize':100,
                                          'minimumStd':0.1},
                 'alphaPI': alphaPI,
                 'atomPartitionScale': atomPartitionScale,
@@ -1416,7 +1416,7 @@ class Tree:
                 else:
                     # for deterministic case
                     continue
-            else:
+            elif self.withinNode(p):
                 # add observations to the new sampled points
                 _p = Point()
                 _p.init(p,self,problem)                
