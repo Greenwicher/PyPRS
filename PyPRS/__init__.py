@@ -246,7 +246,7 @@ class Core:
             self.currentSampleSize = sum([len(visitedPoints[k].history) for k in visitedPoints])
             self.sampleSize.append(self.currentSampleSize)
             #calculate algorithm's performance metric
-            self.hyperVolume.append(performance.calHyperVolume(utils.paretoSetToFront(paretoSet),problem.referencePoint))                        
+            self.hyperVolume.append(performance.calHyperVolume(utils.paretoSetToTrueFront(paretoSet),problem.referencePoint))                        
             self.trueParetoProportion.append(performance.calTrueParetoProportion(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             self.hausdorffDistance.append(performance.calHausdorffDistance(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
             #visualize current search progress
@@ -1136,7 +1136,7 @@ class Race:
                         LB, UB, discreteLevel)[0] for individual in pop]
             objValue = {}
             candidateList = paretoSet + popList
-            paretoSet, front = [], []
+            paretoSet
             for p in candidateList:
                 objValue[utils.generateKey(p)] = [p, self.problemPRS.evaluate(p)[0]]
             for k1 in objValue:
@@ -1147,7 +1147,10 @@ class Race:
                         break
                 if flag: 
                     paretoSet.append(objValue[k1][0])
-                    front.append(objValue[k1][1])
+            # get the true front value
+            front = []
+            for p in paretoSet:
+                front.append(self.problemPRS.evaluateTrue(p)[0])
             HV.append(performance.calHyperVolume(front,self.problemPRS.referencePoint))
             GO.append(performance.calTrueParetoProportion(paretoSet, trueParetoSet))
             HD.append(performance.calHausdorffDistance(paretoSet, trueParetoSet))        
