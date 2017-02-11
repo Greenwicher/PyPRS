@@ -97,12 +97,12 @@ def elite(leaf, n, args):
  
     import PyGMO
     problem = copy.deepcopy(args['elite']['problemGMO'])
-    problem.lb = tuple(leaf.lb)
-    problem.ub = tuple(leaf.ub)
     # check whether problem is stochastic or not
     if leaf.problem.stochastic:
         # do the replication outside
-        problem = PyGMO.problem.noisy(problem, trials = 1)
+        problem = PyGMO.problem.noisy(problem, trials=1, param_first=0.0, param_second=leaf.problem.std, noise_type=PyGMO.problem.noisy.noise_distribution.NORMAL)
+    problem.lb = tuple(leaf.lb)
+    problem.ub = tuple(leaf.ub)
     alg = copy.deepcopy(args['elite']['algGMO'])
     numPop = args['elite']['numPop']
     
