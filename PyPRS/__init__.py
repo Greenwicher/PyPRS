@@ -175,15 +175,16 @@ class Core:
                 #observe spls multi-objectives
                 _points = spl['samples']
                 node = spl['leaf'] 
-                # remove already visited points (even for stochastic case), the feasiblity check is not elegant
-                points = [p for p in _points if not(utils.generateKey(p) in node.pool) and utils.withinRegion(p, node.lb, node.ub)]
                 #determine replication size for each points to be sampled
                 if problem.stochastic:
                     #stochastic case
-                    repSize = self.rule.replicationSize(node,points,self.MPR,self.rule.replicationSizeArgs)             
-                else:
+                    points = [p for p in _points if utils.withinRegion(p, node.lb, node.ub)]                      
+                    repSize = self.rule.replicationSize(node,points,self.MPR,self.rule.replicationSizeArgs)                                                          
+                else:                    
                     #deterministic case
-                    repSize = np.array([1]*len(points))                            
+                    # remove already visited points, the feasiblity check is not elegant
+                    points = [p for p in _points if not(utils.generateKey(p) in node.pool) and utils.withinRegion(p, node.lb, node.ub)]                                               
+                    repSize = np.array([1]*len(points)) 
                 #objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))  #not efficient than the following methods          
                 objectives = []
                 for i in range(len(points)):
