@@ -364,6 +364,16 @@ def paretoSetToFront(paretoSet):
     """  
     front = [paretoSet[k].mean for k in paretoSet]
     return front
+
+def paretoSetToTrueFront(paretoSet):
+    """ derive the true Pareto front gievn a dictionary of estimated Pareto Set
+    Args:
+        paretoSet: A dictionary of class Point() representing the Pareto set
+    Returns:
+        front: A list of "Pareto" front objectives value
+    """  
+    front = [paretoSet[k].trueMean for k in paretoSet]
+    return front
     
 def paretoSetToList(paretoSet):
     """ convert a dictionary of paretoSet to list
