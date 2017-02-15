@@ -107,7 +107,7 @@ def elite(leaf, n, args):
     numPop = args['elite']['numPop']
     
     capacity = sampleSize.capacity(leaf)
-    if capacity <= numPop and len(leaf.pool) != capacity:
+    if capacity <= numPop and (len(leaf.pool) != capacity or leaf.problem.stochastic):
         #samples = uniform(leaf, 2 * numPop, args)['samples']
         samples = feasible(leaf, entireSolution(leaf))
         return {'leaf':leaf, 'samples':samples}    

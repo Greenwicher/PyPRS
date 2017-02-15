@@ -58,7 +58,7 @@ def samplingIndex(leaf,args):
     validNodes = []
     for l in leafNodes:
         size = capacity(l)
-        if len(l.pool) < size:
+        if len(l.pool) < size or leaf.problem.stochastic:
             validNodes.append(l)
             sumAlpha += l.samplingIndex
     if leaf in validNodes:
