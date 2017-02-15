@@ -228,7 +228,9 @@ def generateKey(x):
     Returns:
         key: A string of hash value
     """
-    key = str(hash(tuple(list(x))))
+    #key = str(hash(tuple(list(x)))) #not reliable, two different objects can have same hash value likely
+    import hashlib
+    key = hashlib.md5(x).hexdigest()
     return key
     
 
