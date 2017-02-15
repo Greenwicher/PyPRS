@@ -23,13 +23,13 @@ def dominating(p1,p2):
     Returns:
         flag: A boolean value indicating whether p1 dominates p2
     """
-    maxDiff,minDiff = -np.inf,np.inf
+    maxDiff,minDiff,maxAbsDiff = -np.inf,np.inf,-np.inf
     for i in range(p1.shape[0]):
         diff = p1[i] - p2[i]
         if diff > maxDiff: maxDiff = diff
         if diff < minDiff: minDiff = diff
-    flag = maxDiff<=0 and minDiff<0
-#    flag = all(p1<=p2) and any(p1<p2) #not efficient for numba  
+        if abs(diff) > maxAbsDiff: maxAbsDiff = abs(diff)
+    flag = maxDiff<=0 and minDiff<0 and not(maxAbsDiff <= 1e-2)
     return flag
   
 def dictToSortedNumpyArray(d,dim):
