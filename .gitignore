@@ -12,9 +12,9 @@ Thumbs.db
 
 # customized ignored files
 /*.py
-PyNP/build/
-PyNP/rule/__pycache__/
-PyNP/buffer/
+PyPRS/build/
+PyPRS/rule/__pycache__/
+PyPRS/buffer/
 TestCase/
 backup/
 output/
