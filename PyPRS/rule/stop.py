@@ -44,6 +44,20 @@ def exceedMaximumComputationTime(context,args):
     currentComputationTime = (now - context.startTime[0]).total_seconds()
     flag = currentComputationTime >= args['maximumComputationTime']
     return flag or optimality(context, args)
+    
+def exceedMaximumSampleSizeOrComputationTime(context,args):
+    """Exit the PRS algorithm if exceeding maximum sample size or 
+       maximum computation time
+    Args:
+        context: A class Context() recording the information of this case
+    Returns:
+        flag: A boolean value indicating whether the algorithim should stop        
+    """     
+    now = datetime.datetime.now()
+    currentComputationTime = (now - context.startTime[0]).total_seconds()
+    flag1 = currentComputationTime >= args['maximumComputationTime']
+    flag2 = context.currentSampleSize >= args['maximumSampleSize']    
+    return flag1 or flag2 or optimality(context, args)
 
 ###PRECISION PERSPECTIVE####
 
