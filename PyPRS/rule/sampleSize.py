@@ -39,9 +39,10 @@ def metropolisIndex(leaf,args):
     if p < acceptProb:
         alpha = unitSampleSize           
     else:
-        alpha = [unitSampleSize, 1][leaf.pool!={}]
+        
+        alpha = [unitSampleSize, 10][leaf.pool!={}]
     #print('Prob=%.3f, AcceptProb=%.3f, samplingIndex=%.3f, alpha=%d \n' % (p,acceptProb,leaf.samplingIndex,alpha))         
-    return alpha
+    return max(alpha, 10)
     
 def samplingIndex(leaf,args):
     """ determine sampling size for the leaf node region based on sampling
