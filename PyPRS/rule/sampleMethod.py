@@ -32,7 +32,7 @@ def uniform(leaf, n, args):
     while (len(samples) < n and t < T):
         x = discretize(leaf, np.random.uniform(leaf.lb,leaf.ub,(1,len(leaf.lb))))[0]
         key = utils.generateKey(x)
-        if not(key in visitedPoints or key in samplesKey):
+        if not(key in visitedPoints or key in samplesKey) or leaf.problem.stochastic:
             samples.append(x)
             samplesKey.append(key)
         t += 1
@@ -138,7 +138,7 @@ def elite(leaf, n, args):
         for individual in pop:
             x = discretize(leaf, [individual.cur_x])[0]
             key = utils.generateKey(x)
-            if not((key in visitedPoints) or (key in samplesKey)):
+            if not((key in visitedPoints) or (key in samplesKey)) or leaf.problem.stochastic:
                 samples.append(x)
                 samplesKey.append(key)
         pop = alg.evolve(pop) 
