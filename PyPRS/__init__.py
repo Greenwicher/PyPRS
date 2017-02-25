@@ -178,7 +178,7 @@ class Core:
                 #determine replication size for each points to be sampled
                 if problem.stochastic:
                     #stochastic case
-                    points = [p for p in _points if utils.withinRegion(p, node.lb, node.ub)]                      
+                    points = [p for p in _points if utils.withinRegion(p, node.lb, node.ub)]                                                          
                     repSize = self.rule.replicationSize(node,points,self.MPR,self.rule.replicationSizeArgs)                                                          
                 else:                    
                     #deterministic case
@@ -206,14 +206,21 @@ class Core:
 #                #debug
                 
             paretoSet = utils.identifyParetoSetParallel(self.tree)
-            visitedPoints = self.tree.root.visitedPoints()            
+            visitedPoints = self.tree.root.visitedPoints()  
+            
+            #debug
+            print('...See', sum([key in visitedPoints for key in [utils.generateKey(np.array([i/problem.discreteLevel]+[0]*(problem.dim-1))) for i in range(problem.discreteLevel+1)]]))
+            #debug
+            
 #            # identify current Pareto set and draw more replications for them
-#            if problem.stochastic:               
-#                points = [paretoSet[k].x for k in paretoSet]
-#                repSize = np.array([self.rule.replicationSizeArgs['paretoReplicationSize']]*len(paretoSet))
-#                objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))   
+#            if problem.stochastic:                
 #                for node in leafNodes:
-#                    node.updatePool(points,objectives,problem)             
+#                    local_paretoSet = utils.identifyParetoSet(node.pool)
+#                    points = [local_paretoSet[k].x for k in local_paretoSet]
+#                    repSize = np.array([self.rule.replicationSizeArgs['paretoReplicationSize']]*len(local_paretoSet))
+#                    objectives = utils.MultiThread(problem.evaluate,zip(points,repSize))                      
+#                    node.updatePool(points,objectives,problem) 
+            
             #update promising index                       
             promisingIndex = utils.MultiThread(self.rule.pi,zip(leafNodes))                         
             utils.MultiThread(utils.updateObjAttr,zip(leafNodes,repeat('promisingIndex'),promisingIndex))    
@@ -245,6 +252,9 @@ class Core:
             visitedPoints = self.tree.root.visitedPoints()
             self.currentSampleSize = sum([len(visitedPoints[k].history) for k in visitedPoints])
             self.sampleSize.append(self.currentSampleSize)
+            #debug
+            print('Observed', len(visitedPoints), ' samples')
+            #debug
             #calculate algorithm's performance metric
             self.hyperVolume.append(performance.calHyperVolume(utils.paretoSetToTrueFront(paretoSet),problem.referencePoint))                        
             self.trueParetoProportion.append(performance.calTrueParetoProportion(utils.paretoSetToList(paretoSet), utils.paretoSetToList(problem.trueParetoSet)))
@@ -312,7 +322,7 @@ class Core:
                                     'unitSampleSize': unitSampleSize},
                 'replicationSizeArgs' : {'unitReplicationSize':unitReplicationSize,
                                          'replicationTimes':replicationTimes,
-                                         'paretoReplicationSize':100,
+                                         'paretoReplicationSize':unitReplicationSize,
                                          'minimumStd':0.1},
                 'alphaPI': alphaPI,
                 'atomPartitionScale': atomPartitionScale,
@@ -361,7 +371,10 @@ class Point:
         Returns:
             None
         """
-        self.x = x
+        #debug
+        assert type(x) == type(np.array([])), 'Wrong type: ' + str(type(x)) + str(type(np.array([])))
+        #debug
+        self.x = np.round(x, 5)
         self.key = utils.generateKey(x)
         self.node = node
         flag = utils.withinRegion(x,problem.lb,problem.ub)        
@@ -1129,7 +1142,9 @@ class Race:
         except:
             numTrials = 1
         t = 0
-        while(max(pop.problem.fevals * numTrials, t) < self.maximumSampleSize):
+        import time
+        start_time = time.time()
+        while(max(pop.problem.fevals * numTrials, t) < self.maximumSampleSize and time.time()-start_time <= 600):
             pop = alg.evolve(pop)
             # update paretoSet
             popList = [utils.discretize([np.array(individual.cur_x)], 
