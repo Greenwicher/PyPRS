@@ -5,22 +5,26 @@
 #include <iostream>
 #include <limits>
 #include <Python.h>
+#include <cmath>
 #define SWIG_FILE_WITH_INIT
 using namespace std;
 
 bool dominating(int len1, double *p1, int len2, double *p2){
-	double maxDiff = -std::numeric_limits<double>::infinity();
-	double minDiff = std::numeric_limits<double>::infinity();
-	int size = sizeof(p1) / sizeof(p1[0]) + 1;
-	for (int i = 0; i<size; i++){
-		double diff = p1[i] - p2[i];
-		if (diff > maxDiff) maxDiff = diff;
-		if (diff < minDiff) minDiff = diff;
-	}
-	bool flag = maxDiff <= 0.0 && minDiff < 0.0;
-	return flag;
+    double maxDiff = -std::numeric_limits<double>::infinity();
+    double minDiff = std::numeric_limits<double>::infinity();
+    double maxAbsDiff = -std::numeric_limits<double>::infinity();
+    int size = sizeof(p1) / sizeof(p1[0]) + 1;
+    for (int i = 0; i<size; i++){
+        double diff = p1[i] - p2[i];
+        if (diff > maxDiff) maxDiff = diff;
+        if (diff < minDiff) minDiff = diff;
+        if (std::abs(diff) > maxAbsDiff) maxAbsDiff = std::abs(diff);
+    }
+    bool flag = maxDiff <= 0.0 && minDiff < 0.0 && !(maxAbsDiff <= 0.01);
+    return flag;
 }
-
+    
+    
 bool stopSearch(int i, int len, double p1, double p2){
 	return !(i<len && p1>=p2);	
 }
