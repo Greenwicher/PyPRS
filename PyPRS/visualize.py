@@ -12,6 +12,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
+import matplotlib
 import re
 
 def partitionBounds(leafNodes):
@@ -384,7 +385,7 @@ def plotConvergence(problemKey, yName, y, title, bestY = np.nan, outputdir='outp
         plt.plot(x, y[key]['ensemble'], color=y[key]['color'], ls='-', linewidth=1)        
         plt.plot(np.array(x)[markers_on], np.array(y[key]['ensemble'])[markers_on], 
                  color=y[key]['color'], marker=y[key]['marker'], 
-                 ls='None', label=key)
+                 ls='None', markersize=13, label=key)
         miny = min(miny, np.nanmin(y[key]['ensemble']))
         maxy = max(maxy, np.nanmax(y[key]['ensemble']))
     maxy = np.nanmax([maxy, bestY])
@@ -393,12 +394,13 @@ def plotConvergence(problemKey, yName, y, title, bestY = np.nan, outputdir='outp
         plt.plot(x,[bestY] * len(x), ls='-', color='k', linewidth=1, label='Best Value')
     lgd = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax.tick_params(axis='both', which='major', direction='in', length=6, width=2)
-    plt.title(title)
+    # plt.title(title)
     plt.xlabel('# of Evaluations')
     plt.ylabel(yName)
     plt.grid()
     ax.set_ylim([miny - 0.1 * (maxy - miny), maxy + 0.1 * (maxy - miny)])
     ax.set_xlim([1, len(x)])
+    matplotlib.rcParams.update({'font.size': 26})
     fig.set_size_inches(12, 8)
     fig.savefig(outputdir+'algo-comparison-%s-%s.png' % (problemKey, yName), dpi=200, bbox_inches="tight", additional_artist=[lgd]) 
     fig.savefig(outputdir+'algo-comparison-%s-%s.eps' % (problemKey, yName), dpi=200, bbox_inches="tight", additional_artist=[lgd]) 
