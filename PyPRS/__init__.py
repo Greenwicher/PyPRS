@@ -671,13 +671,25 @@ class Problem:
 
     def fon(num,isStochastic,std=1,dim=2,referencePoint = np.array([]), discreteLevel = 0):
         """optimal solution = {x1=...=xn=[-1/sqrt(n),1/sqrt(n)]}
-        """        
-#        dim = 2
+        """
         lb = np.array([-4.0,]*dim)
         ub = np.array([4.0,]*dim)
-        objectives = [objective.fon1,objective.fon2]   
-        trueParetoSet = [[x1,]*dim for x1 in np.linspace(-1/np.sqrt(dim),1/np.sqrt(dim),10000)]   
-        trueParetoSet = utils.discretize(trueParetoSet, lb, ub, discreteLevel)
+        objectives = [objective.fon1,objective.fon2]
+        if discreteLevel == 0:
+            trueParetoSet = [[x1,]*dim for x1 in np.linspace(-1/np.sqrt(dim),1/np.sqrt(dim),10000)]
+            trueParetoSet = utils.discretize(trueParetoSet, lb, ub, discreteLevel)
+        else:
+            # enumerate all the feasible solutions
+            solutionSet = utils.generateSolutionSet(discreteLevel, dim, (-4.0, 4.0))
+            # calculate the performance of all feasible solutions
+            performances = [np.array([f(p) for f in objectives]) for p in solutionSet]
+            # identify the index of all non-dominated solutions
+            paretoIndex = utils.identifyPureParetoSet(performances)
+            # retrieve the solutions point of non-dominated solutions
+            trueParetoSet = []
+            for i in paretoIndex:
+                trueParetoSet.append(solutionSet[i])
+            trueParetoSet = np.array(trueParetoSet)
         problemArgs = {
                         'description':'FON',
                         'lb':lb,
