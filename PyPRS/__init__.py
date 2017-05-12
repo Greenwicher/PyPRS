@@ -825,7 +825,19 @@ class Problem:
     def kur(num,isStochastic,std=1,dim=2,referencePoint=np.array([]), discreteLevel = 0):
         lb = np.array([-5.0,]*dim)
         ub = np.array([5.0,]*dim)
-        objectives = [objective.kur1,objective.kur2]        
+        objectives = [objective.kur1,objective.kur2]
+        if discreteLevel == 0: discreteLevel = 100
+        # enumerate all the feasible solutions
+        solutionSet = utils.generateSolutionSet(discreteLevel, dim, (-5.0, 5.0))
+        # calculate the performance of all feasible solutions
+        performances = [np.array([f(p) for f in objectives]) for p in solutionSet]
+        # identify the index of all non-dominated solutions
+        paretoIndex = utils.identifyPureParetoSet(performances)
+        # retrieve the solutions point of non-dominated solutions
+        trueParetoSet = []
+        for i in paretoIndex:
+            trueParetoSet.append(solutionSet[i])
+        trueParetoSet = np.array(trueParetoSet)
         problemArgs = {
                         'description':'KUR',
                         'lb':lb,
@@ -834,7 +846,8 @@ class Problem:
                         'num': num,
                         'stochastic': isStochastic,
                         'std': std,
-                        'referencePoint': referencePoint, 
+                        'referencePoint': referencePoint,
+                        'trueParetoSet': trueParetoSet,
                         'dim': dim,      
                         'discreteLevel': discreteLevel,                        
         }
