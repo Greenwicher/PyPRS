@@ -791,7 +791,20 @@ class Problem:
     def pol(num,isStochastic,std=1,referencePoint=np.array([]), discreteLevel = 0):
         lb = np.array([-np.pi,-np.pi])
         ub = np.array([np.pi,np.pi])
-        objectives = [objective.pol1,objective.pol2]        
+        objectives = [objective.pol1,objective.pol2]
+        if discreteLevel == 0: discreteLevel = 100
+        dim = 2
+        # enumerate all the feasible solutions
+        solutionSet = utils.generateSolutionSet(discreteLevel, dim, (-np.pi, np.pi))
+        # calculate the performance of all feasible solutions
+        performances = [np.array([f(p) for f in objectives]) for p in solutionSet]
+        # identify the index of all non-dominated solutions
+        paretoIndex = utils.identifyPureParetoSet(performances)
+        # retrieve the solutions point of non-dominated solutions
+        trueParetoSet = []
+        for i in paretoIndex:
+            trueParetoSet.append(solutionSet[i])
+        trueParetoSet = np.array(trueParetoSet)
         problemArgs = {
                         'description':'POL',
                         'lb':lb,
@@ -800,7 +813,9 @@ class Problem:
                         'num': num,
                         'stochastic': isStochastic,
                         'std': std,
-                        'referencePoint':referencePoint,   
+                        'referencePoint':referencePoint,
+                        'trueParetoSet': trueParetoSet,
+                        'dim': dim,
                         'discreteLevel': discreteLevel,                        
         }
         problem = Problem()
