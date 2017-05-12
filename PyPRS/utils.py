@@ -171,7 +171,25 @@ def updateObjAttr(obj,attr,value):
     """
     setattr(obj,attr,value)
     return     
-    
+
+def identifyPureParetoSet(performances):
+    """ identify the set of the index of all non-dominated solutions given the corresponding performance list
+    Args:
+        performances: A list including the performance (numpy array) of all feasible solutions
+    Returns:
+        paretoSet: A list including the index of all non-dominated solutions
+    """
+    paretoSet = []
+    size = len(performances)
+    for i in range(size):
+        flag = True
+        for j in range(size):
+            if j != i and _cutils.dominating(performances[j], performances[i]):
+                flag = False
+                break
+        if flag: paretoSet.append(i)
+    return paretoSet
+
 def identifyParetoSet(visitedPoints):
     """identify the Pareto Set given the visited points
     Args:
