@@ -404,3 +404,17 @@ def paretoSetToList(paretoSet):
     """
     x = [paretoSet[k].x for k in paretoSet]
     return x
+
+def generateSolutionSet(discreteLevel, dim, bound=(), bounds=[]):
+    """
+    :param discreteLevel: An integer indicating the discrete level (0 means continuous)
+    :param dim: An integer indicating the number of dimensions
+    :param bounds: A numpy array indicating the bounds of each dimension
+    :param bound: A tuple indicating the same bound of each dimension
+    :return: A numpy array indicating all the feasible solutions
+    """
+    n_bins = [discreteLevel + 1, 100][discreteLevel == 0] * np.ones(dim)
+    if not(bounds):
+        bounds = np.repeat([bound], dim, axis=0)
+    solutions = np.mgrid[[slice(row[0], row[1], n * 1j) for row, n in zip(bounds, n_bins)]].reshape(dim, -1).T
+    return solutions
