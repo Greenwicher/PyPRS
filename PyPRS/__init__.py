@@ -1513,7 +1513,8 @@ class Tree:
         Returns:
             A boolean value that indicates whether x is within the node
         """
-        return all(self.lb<=x) and all(x<=self.ub)
+        epsilon = 1e-6
+        return all(self.lb - epsilon <= x) and all(x <= self.ub + epsilon)
     
     @jit
     def calDominationCount(self):
