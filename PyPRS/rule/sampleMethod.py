@@ -126,10 +126,17 @@ def elite(leaf, n, args):
         candidate.append(p)
     # construct initial population
     pop = PyGMO.population(problem, numPop)
+    count = 0
     for x in candidate:
-        if leaf.withinNode(x):
-            pop.push_back(list(x))
-            pop.erase(0)
+        try:
+            if leaf.withinNode(x):
+                pop.push_back(list(x))
+                pop.erase(0)
+                count += 1
+        except:
+            continue
+        if count == numPop:
+            break
     samples = []
     samplesKey = []
     # generate new elite points
