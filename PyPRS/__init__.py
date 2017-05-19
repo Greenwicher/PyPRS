@@ -356,7 +356,9 @@ class Point:
             None
         """
         #debug
-        assert type(x) == type(np.array([])), 'Wrong type: ' + str(type(x)) + str(type(np.array([])))
+        # assert type(x) == type(np.array([])), 'Wrong type: ' + str(type(x)) + str(type(np.array([])))
+        if type(x) != type(np.array([])):
+            x = np.array(x)
         #debug
         self.x = np.round(x, 5)
         self.key = utils.generateKey(x)
@@ -776,7 +778,7 @@ class Problem:
         lb = np.array([-np.pi,-np.pi])
         ub = np.array([np.pi,np.pi])
         objectives = [objective.pol1,objective.pol2]
-        if discreteLevel == 0: discreteLevel = 100
+        if discreteLevel == 0: discreteLevel = 300
         dim = 2
         # enumerate all the feasible solutions
         solutionSet = utils.generateSolutionSet(discreteLevel, dim, (-np.pi, np.pi))
@@ -810,7 +812,7 @@ class Problem:
         lb = np.array([-5.0,]*dim)
         ub = np.array([5.0,]*dim)
         objectives = [objective.kur1,objective.kur2]
-        if discreteLevel == 0: discreteLevel = 100
+        if discreteLevel == 0: discreteLevel = 300
         # enumerate all the feasible solutions
         solutionSet = utils.generateSolutionSet(discreteLevel, dim, (-5.0, 5.0))
         # calculate the performance of all feasible solutions
