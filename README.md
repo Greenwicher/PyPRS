@@ -40,8 +40,8 @@ Below is an illustration that shows how MPRS-C can converge to the global Pareto
 ### Basic Idea of MPRS-C: Constrained MOvS
 
 ![](statics/mprsc1.jpg)
-![](statics\mprsc2.jpg)
-![](statics\mprsc3.jpg)
+![](statics/mprsc2.jpg)
+![](statics/mprsc3.jpg)
 ![](statics/mprsc4.jpg)
 ![](statics/mprsc5.jpg)
 ![](statics/mprsc6.jpg)
