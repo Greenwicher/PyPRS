@@ -1,6 +1,25 @@
-# PyPRS: Python Implementation for Partition-based Random Search
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-[TOC]
+- [Python Implementation for Partition-based Random Search (PyPRS)](#python-implementation-for-partition-based-random-search-pyprs)
+  - [Introduction](#introduction)
+    - [Demo of MPRS-C](#demo-of-mprs-c)
+      - [Test Problem: ZDT1](#test-problem-zdt1)
+      - [Test Problem: FON](#test-problem-fon)
+    - [Basic Idea of MPRS-C: Constrained MOvS](#basic-idea-of-mprs-c-constrained-movs)
+    - [Basic Idea of MPRS-U: Unconstrained MOvS](#basic-idea-of-mprs-u-unconstrained-movs)
+  - [Tutorial](#tutorial)
+    - [How to define the optimization problem?](#how-to-define-the-optimization-problem)
+    - [How to define the Partition-based Random Search algorithm?](#how-to-define-the-partition-based-random-search-algorithm)
+    - [How to run and compare the algorithms?](#how-to-run-and-compare-the-algorithms)
+    - [How to visualize the convergence of the algorithms?](#how-to-visualize-the-convergence-of-the-algorithms)
+    - [More random search algorithms for the Multi-objective optimization](#more-random-search-algorithms-for-the-multi-objective-optimization)
+    - [Example Codes](#example-codes)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Python Implementation for Partition-based Random Search (PyPRS)
 
 ## Introduction
 
