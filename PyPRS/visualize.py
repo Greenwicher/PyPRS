@@ -194,60 +194,119 @@ def All(case):
     return 
     
 def generateAnimationFrame(outputDir,i,prs,trueParetoSet):
+#     tree = prs.tree
+#     leafNodes = tree.root.leafNodes()
+#     xv = trueParetoSet['xv']
+#     yv = trueParetoSet['yv']
+#     isPareto = trueParetoSet['isPareto']
+#     dominationCount = trueParetoSet['dominationCount']
+#     fig = plt.figure()
+#
+#     # Domination Count Contour Plot
+#     ax = fig.add_subplot(241)
+#     Contour2D(fig,ax,xv,yv,dominationCount,leafNodes,'Domination Count (Iteration %d)' % (i),True)
+#
+# #    # Global Pareto Set Contour Plot
+# #    ax = fig.add_subplot(232)
+# #    Contour2D(fig,ax,xv,yv,isPareto,leafNodes,'True Pareto Set (Iteration %d)' % (i),True)
+#
+#     #visitedSolutions
+#     fig.add_subplot(242)
+#     MPR = utils.identifyMPR(tree,prs.rule.alphaPI)
+#     colorRegion(leafNodes,MPR,'blue','Convergence of MPR (Iteration %d)' % (i), 'x1','x2')
+#
+#     # Convergence of Hypervolume
+#     ax = fig.add_subplot(243)
+#     Series(range(1,len(prs.hyperVolume)+1),prs.hyperVolume,'Hypervolume (Iteration %d)' % (i),'iteration','hypervolume')
+#
+#     # Convergence of True Pareto Proportion
+#     ax = fig.add_subplot(244)
+#     Series(range(1,len(prs.trueParetoProportion)+1),prs.trueParetoProportion,'True Pareto Proportion (Iteration %d)' % (i),'iteration','true pareto proportion')
+#
+#     #visitedSolutions
+#     fig.add_subplot(245)
+#     visitedPoints = tree.visitedPoints()
+#     Scatter2DColor(visitedPoints,'x',leafNodes,'All Visited Points (Iteration %d)' % (i),'x1','x2',True)
+#
+#     #paretoSet
+#     fig.add_subplot(246)
+#     paretoSet = utils.identifyParetoSetParallel(tree)
+#     Scatter2DColor(paretoSet,'x',leafNodes,'Estimated Pareto Set (Iteration %d)' % (i),'x1','x2',True)
+#
+#     #estimated Pareto front
+#     fig.add_subplot(247)
+#     Scatter2DColor(visitedPoints,'mean',leafNodes,'Estimated Pareto Front (Iteration %d)' % (i),'obj1','obj2',False)
+#
+#     # Convergence of Hausdorff Distance
+#     ax = fig.add_subplot(248)
+#     Series(range(1,len(prs.hausdorffDistance)+1),prs.hausdorffDistance,'Hausdorff Distance (Iteration %d)' % (i),'iteration','Hausdorff Distance')
+#
+#
+#     #save figures
+#     matplotlib.rcParams.update({'font.size': 20})
+#     fig.set_size_inches(32, 16)
+#     fig.savefig(outputDir+'/animation-%d.png' % i, dpi=200, bbox_inches="tight")
+#     fig.savefig(outputDir+'/eps-animation-%d.eps' % i, dpi=200, bbox_inches="tight")
+#     plt.close()
+
+    # the above code draw each sub-figure with titles and the font is relative small, the following code is for the
+    # generation of figures used in academic journals
     tree = prs.tree
     leafNodes = tree.root.leafNodes()
     xv = trueParetoSet['xv']
     yv = trueParetoSet['yv']
     isPareto = trueParetoSet['isPareto']
     dominationCount = trueParetoSet['dominationCount']
-    fig = plt.figure()             
-    
+    fig = plt.figure()
+
     # Domination Count Contour Plot
     ax = fig.add_subplot(241)
-    Contour2D(fig,ax,xv,yv,dominationCount,leafNodes,'Domination Count (Iteration %d)' % (i),True)
-    
-#    # Global Pareto Set Contour Plot
-#    ax = fig.add_subplot(232)
-#    Contour2D(fig,ax,xv,yv,isPareto,leafNodes,'True Pareto Set (Iteration %d)' % (i),True)      
-    
-    #visitedSolutions
+    Contour2D(fig, ax, xv, yv, dominationCount, leafNodes, 'Domination Count', True)
+
+    #    # Global Pareto Set Contour Plot
+    #    ax = fig.add_subplot(232)
+    #    Contour2D(fig,ax,xv,yv,isPareto,leafNodes,'True Pareto Set (Iteration %d)' % (i),True)
+
+    # visitedSolutions
     fig.add_subplot(242)
-    MPR = utils.identifyMPR(tree,prs.rule.alphaPI)
-    colorRegion(leafNodes,MPR,'blue','Convergence of MPR (Iteration %d)' % (i), 'x1','x2')    
-    
+    MPR = utils.identifyMPR(tree, prs.rule.alphaPI)
+    colorRegion(leafNodes, MPR, 'blue', 'Convergence of MPR', 'x1', 'x2')
+
     # Convergence of Hypervolume
     ax = fig.add_subplot(243)
-    Series(range(1,len(prs.hyperVolume)+1),prs.hyperVolume,'Hypervolume (Iteration %d)' % (i),'iteration','hypervolume')
+    Series(range(1, len(prs.hyperVolume) + 1), prs.hyperVolume, 'Hypervolume', 'iteration',
+           'hypervolume')
 
     # Convergence of True Pareto Proportion
     ax = fig.add_subplot(244)
-    Series(range(1,len(prs.trueParetoProportion)+1),prs.trueParetoProportion,'True Pareto Proportion (Iteration %d)' % (i),'iteration','true pareto proportion')
+    Series(range(1, len(prs.trueParetoProportion) + 1), prs.trueParetoProportion,
+           'True Pareto Proportion', 'iteration', 'true pareto proportion')
 
-    #visitedSolutions
+    # visitedSolutions
     fig.add_subplot(245)
     visitedPoints = tree.visitedPoints()
-    Scatter2DColor(visitedPoints,'x',leafNodes,'All Visited Points (Iteration %d)' % (i),'x1','x2',True)
-            
-    #paretoSet
+    Scatter2DColor(visitedPoints, 'x', leafNodes, 'All Visited Points', 'x1', 'x2', True)
+
+    # paretoSet
     fig.add_subplot(246)
     paretoSet = utils.identifyParetoSetParallel(tree)
-    Scatter2DColor(paretoSet,'x',leafNodes,'Estimated Pareto Set (Iteration %d)' % (i),'x1','x2',True)
-    
-    #estimated Pareto front
+    Scatter2DColor(paretoSet, 'x', leafNodes, 'Estimated Pareto Set', 'x1', 'x2', True)
+
+    # estimated Pareto front
     fig.add_subplot(247)
-    Scatter2DColor(visitedPoints,'mean',leafNodes,'Estimated Pareto Front (Iteration %d)' % (i),'obj1','obj2',False)    
-    
+    Scatter2DColor(visitedPoints, 'mean', leafNodes, 'Estimated Pareto Front', 'obj1', 'obj2', False)
+
     # Convergence of Hausdorff Distance
     ax = fig.add_subplot(248)
-    Series(range(1,len(prs.hausdorffDistance)+1),prs.hausdorffDistance,'Hausdorff Distance (Iteration %d)' % (i),'iteration','Hausdorff Distance')
-    
-    
-    #save figures
+    Series(range(1, len(prs.hausdorffDistance) + 1), prs.hausdorffDistance, 'Hausdorff Distance',
+           'iteration', 'Hausdorff Distance')
+
+    # save figures
+    matplotlib.rcParams.update({'font.size': 22})
     fig.set_size_inches(32, 16)
-    fig.savefig(outputDir+'/animation-%d.png' % i, dpi=200, bbox_inches="tight")   
-    fig.savefig(outputDir+'/eps-animation-%d.eps' % i, dpi=200, bbox_inches="tight")     
+    fig.savefig(outputDir + '/animation-%d.png' % i, dpi=200, bbox_inches="tight")
+    fig.savefig(outputDir + '/eps-animation-%d.eps' % i, dpi=200, bbox_inches="tight")
     plt.close()
-    
     return 
 
 def atoi(text):
