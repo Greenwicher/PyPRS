@@ -188,13 +188,13 @@ def moprs(deltaSampleSize=30, unitSampleSize=5,
             'partitionArgs': partitionArgs,
             'animationOn': animationOn,
         }
-    r = RuleSet()
+    r = prs.RuleSet()
     r.init(ruleArgs)
     #new search tree
-    tree = Tree()
+    tree = prs.Tree()
     #define PRS algorithms
     algoArgs = {'description':'Default MO-PRS','rule':r,'tree':tree,}
-    algo = Core()
+    algo = prs.Core()
     algo.init(algoArgs)  
     return algo
 ```
