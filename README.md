@@ -213,4 +213,4 @@ Please check [PyGMO](http://esa.github.io/pygmo/) (the Python Parallel Global Mu
 
 ### Example Codes
 
-In the directory "example/ieee tevc", we provided several examples, which compare the convergence performance of our framework to the well-known benchmarks (e.g., VEGA, SPEA2, NSGA-II, NSPSO and SMS-EMOA) for both deterministic and stochastic case, used in our working paper. 
+In the directory "example/paper", we provided several examples, which compare the convergence performance of our framework to the well-known benchmarks (e.g., VEGA, SPEA2, NSGA-II, NSPSO and SMS-EMOA) for both deterministic and stochastic case, used in our working paper. 
